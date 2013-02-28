@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.trial;
 
 public class TrialMeta {
     private long id;

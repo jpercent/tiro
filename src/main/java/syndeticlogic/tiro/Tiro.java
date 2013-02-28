@@ -27,6 +27,9 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import syndeticlogic.tiro.controller.ControllerMeta;
+import syndeticlogic.tiro.trial.TrialMeta;
+import syndeticlogic.tiro.trial.TrialResultsJdbcDao;
+import syndeticlogic.tiro.trial.TrialRunner;
 
 public class Tiro {
     

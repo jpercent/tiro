@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.trial;
 
 public class TrialResult {
     private Long duration;

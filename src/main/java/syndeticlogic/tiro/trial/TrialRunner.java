@@ -1,4 +1,4 @@
-   package syndeticlogic.tiro;
+   package syndeticlogic.tiro.trial;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,14 +21,14 @@ public class TrialRunner {
         runThreads = new Thread[controllers.length];
     }
     
-    void startTrial() {
+    public void startTrial() {
         monitor.start();
         for(int i = 0; i < controllers.length; i++) {
             runThreads[i] = startThread(controllers[i]);
         }
     }
     
-    Thread startThread(final IOController controller) {
+    public Thread startThread(final IOController controller) {
         Thread runThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -64,7 +64,7 @@ public class TrialRunner {
         return runThread;
     }
 
-    void waitForTrialCompletion() throws InterruptedException {
+    public void waitForTrialCompletion() throws InterruptedException {
         for(int i = 0; i < runThreads.length; i++) {
             runThreads[i].join();
         }

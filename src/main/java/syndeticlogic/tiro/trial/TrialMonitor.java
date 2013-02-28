@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.trial;
 
 import java.io.BufferedReader;
 import java.io.IOException;

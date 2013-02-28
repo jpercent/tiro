@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.trial;
 
 import java.util.Arrays;
 import java.util.HashMap;

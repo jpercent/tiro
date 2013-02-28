@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.trial;
 
 import syndeticlogic.tiro.controller.ControllerMeta;
 
