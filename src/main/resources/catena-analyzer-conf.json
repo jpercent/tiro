@@ -1,0 +1,13 @@
+{
+/* Comments */
+
+    "trials" : [
+        {"name": "1-threaded-sequential-scan",
+         "controllers" : [
+            {"sequentialscan": { "executor" : "syncfilechannel", "memory" : "java" }}]}, 
+        {"name": "2-threaded-sequential-scan",
+         "controllers" : [
+                {"sequentialscan": { "executor" : "syncfilechannel", "memory" : "java" }}, 
+                {"sequentialscan": { "executor" : "syncfilechannel", "memory" : "java" }}]}]
+}
+           
