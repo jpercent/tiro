@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import syndeticlogic.tiro.controller.ControllerMeta;
+import syndeticlogic.tiro.controller.IORecord;
+
 public class TrialResultCollector {
     final HashMap<Long, IOControllerResultDescriptor> trials;
     final Thread serializer;

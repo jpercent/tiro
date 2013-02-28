@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.controller;
 
 public class SequentialLBAGenerator implements LBAGenerator {
     protected int blockSize;

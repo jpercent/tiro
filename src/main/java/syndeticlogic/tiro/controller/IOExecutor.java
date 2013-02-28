@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.controller;
 
 public interface IOExecutor {
     public enum ExecutorType { Sync, Async };

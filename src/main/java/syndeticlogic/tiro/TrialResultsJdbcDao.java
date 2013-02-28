@@ -12,6 +12,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import syndeticlogic.tiro.controller.ControllerMeta;
+import syndeticlogic.tiro.controller.IORecord;
+import syndeticlogic.tiro.monitor.IOMonitor;
+import syndeticlogic.tiro.monitor.MemoryMonitor;
+
 import java.sql.PreparedStatement;
 
 public class TrialResultsJdbcDao {
@@ -144,13 +149,14 @@ public class TrialResultsJdbcDao {
     }
     
     public void insertTrialMeta(TrialMeta trialMeta) {
+        System.out.println(insertTrialMeta);
         jdbcTemplate.update(insertTrialMeta, trialMeta.getName());
         trialMeta.setId(jdbcTemplate.queryForLong(selectTrialsMetaLast));
     }
 
     public void insertControllerMeta(ControllerMeta controllerMeta) {
         jdbcTemplate.update(insertControllerMeta, controllerMeta.getControllerTypeName(), controllerMeta.getExecutorTypeName(), 
-                controllerMeta.getMemoryTypeName(), controllerMeta.getDevice());
+                controllerMeta.getMemoryTypeName(), controllerMeta.getDevice());        
         controllerMeta.setId(jdbcTemplate.queryForLong(selectControllersMetaLast));
     }
     

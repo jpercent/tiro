@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.controller;
 
 public class IORecord {
     public enum IOStrategy { Read, Write };

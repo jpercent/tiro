@@ -3,6 +3,10 @@
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.tiro.controller.IOController;
+import syndeticlogic.tiro.controller.IOExecutor;
+import syndeticlogic.tiro.controller.IORecord;
+
 public class TrialRunner {
     private static final Log log = LogFactory.getLog(TrialRunner.class);
     private final TrialMonitor monitor;

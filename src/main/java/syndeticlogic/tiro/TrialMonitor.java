@@ -8,6 +8,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.tiro.monitor.AbstractMonitor;
+import syndeticlogic.tiro.monitor.IOMonitor;
+import syndeticlogic.tiro.monitor.MemoryMonitor;
+
 public class TrialMonitor extends AbstractMonitor implements MemoryMonitor, IOMonitor {
 	private Log log = LogFactory.getLog(AbstractMonitor.class);	
 	private MemoryMonitor memoryMonitor;

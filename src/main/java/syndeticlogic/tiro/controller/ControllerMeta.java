@@ -1,4 +1,4 @@
-package syndeticlogic.tiro;
+package syndeticlogic.tiro.controller;
 
 public class ControllerMeta {
     public enum ControllerType {SequentialScan, SequentialWrite, RandomRead, RandomWrite, Random};

@@ -1,0 +1,14 @@
+{
+/* Some comments */
+// More comments
+    trials : [
+        {name : '1-threaded-sequential-scan',
+         controllers : [
+            { controller : 'sequentialscan', executor : 'syncfilechannel', memory : 'java', device : '/dev/sd1' }]}, 
+        {name: '2-threaded-sequential-scan',
+         controllers : [
+                { controller : 'sequentialscan', executor : 'syncfilechannel', memory : 'java', device : '/dev/sg1' },
+                { controller : 'sequentialscan', executor : 'syncfilechannel', memory : 'java', device : '/dev/sd1' }, 
+                { controller : 'sequentialscan', executor : 'syncfilechannel', memory : 'java', device : '/dev/sg2' }]}]
+}
+           

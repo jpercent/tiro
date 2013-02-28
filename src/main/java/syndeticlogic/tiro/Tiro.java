@@ -26,6 +26,8 @@ import org.codehaus.jackson.JsonParser;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import syndeticlogic.tiro.controller.ControllerMeta;
+
 public class Tiro {
     
     public static TrialRunner createSequentialScanTrial() throws Exception {
@@ -36,13 +38,12 @@ public class Tiro {
         //results.insertController();
         return null;
     }
-    
-    public static Properties load(String propsPath) throws Exception {
+
+    public static Properties load(String propsName) throws Exception {        
+        URL url = ClassLoader.getSystemResource(propsName);
         Properties props = new Properties();
-        FileInputStream fis = new FileInputStream(new File(propsPath));
-        props.load(fis);    
-        fis.close();
-        return props;
+        props.load(url.openStream());
+        return props;       
     }
     
     private final Options options = new Options();
@@ -85,7 +86,7 @@ public class Tiro {
             Option retries = OptionBuilder
             .withArgName("n")
             .hasArg()
-            .withDescription("Retries.  Repeats the trials described in the properties file n times.")
+            .withDescription("Retries.  Repeats the trials described in the properties file n times where is bounded between 1 and 50 inclusive.")
                     .create("retries");
 
             options.addOption(help);
@@ -94,7 +95,7 @@ public class Tiro {
             options.addOption(properties);
             options.addOption(retries);
             parser = new GnuParser();
-            jdbcDao = new TrialResultsJdbcDao(Tiro.load("catena-perf-sqlite.properties"));
+            jdbcDao = new TrialResultsJdbcDao(Tiro.load("tiro-sqlite.properties"));
             
         }
     
@@ -127,23 +128,31 @@ public class Tiro {
                             public JsonParser createJsonParser(File file) throws IOException, JsonParseException {
                                 JsonParser p = super.createJsonParser(file);
                                 p.enable(JsonParser.Feature.ALLOW_COMMENTS);
+                                p.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+                                p.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
+                                p.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
                                 return p;
                             }
                     });
-                    config = mapper.readValue(new File(jsonConfigFile), Map.class);
-                    
+                    try {
+                        config = mapper.readValue(new File(jsonConfigFile), Map.class);
+                    } catch(IOException e) {
+                        log.error("Error parsing configuration file.  The configuration file is JSON; ensure that the syntax is\n\t valid: http://json.org/.  Details of the exception follow.\n", e);
+                        return false;
+                    }
                     if (line.hasOption("retries")) {
                         String retries = line.getOptionValue("retries");
                         if (retries != null && !retries.equals("")) {
                             this.retries = new Integer(retries.trim()).intValue();
+                            if (this.retries <= 0 || this.retries > 50) {
+                                throw new org.apache.commons.cli.ParseException("retries is bounded between 1 and 50 inclusive");
+                            }
                         }
                     }
                     ret = true;
                 } else {
                     log.fatal("No config file set");
                 }
-            } catch (IOException e) {
-                log.error("I/O Exception; ", e);
             } catch (org.apache.commons.cli.ParseException e) {
                 log.error("Exception parsing arguments", e);
             }
@@ -163,10 +172,17 @@ public class Tiro {
         
         jdbcDao.initialize();
         System.out.println(config);
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> trials = (List<Map<String, Object>>) config.get("trials");
         for(Map<String, Object> trial : trials) {
-            List<Map<String, Object>> controllers = (List<Map<String, Object>>) trial.get("controllers");
+            @SuppressWarnings("unchecked")
+            List<Map<String, String>> controllers = (List<Map<String, String>>) trial.get("controllers");
             TrialMeta meta = new TrialMeta((String)trial.get("name"));
+           jdbcDao.insertTrialMeta(meta);
+           for(Map<String,String> controller: controllers) {
+               ControllerMeta cmeta = new ControllerMeta(controller.get("controller"), controller.get("executor"), controller.get("memory"), controller.get("device"));
+               jdbcDao.insertControllerMeta(cmeta);
+           }
             System.out.println("Trial = "+ trial);
         }
         
@@ -174,23 +190,29 @@ public class Tiro {
     }
     
     public static void main(String[] args) throws Exception {
-        Tiro factory = new Tiro(args);
-        if (!factory.parse()) {
+        Tiro t3happrentice = new Tiro(args);
+        if (!t3happrentice.parse()) {
+            log.fatal("Failed to parse the command line - exiting.");
             return;
         }
         
-        List<TrialRunner> runners = factory.buildTrials();
-        for(TrialRunner runner : runners) {
-            runner.startTrial();
-            if(!factory.concurrent) {
-                runner.waitForTrialCompletion();
-            }
-        }
-
-        if(factory.concurrent){
+        int count = 0;
+        do {
+        
+            List<TrialRunner> runners = t3happrentice.buildTrials();
+        
             for(TrialRunner runner : runners) {
-                runner.waitForTrialCompletion();
+                runner.startTrial();
+                if(!t3happrentice.concurrent) {
+                    runner.waitForTrialCompletion();
+                }
             }
-        }
+
+            if(t3happrentice.concurrent){
+                for(TrialRunner runner : runners) {
+                    runner.waitForTrialCompletion();
+                }
+            }   
+        } while(++count < t3happrentice.retries);
     }    
 }
