@@ -21,8 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
-//import org.codehaus.jackson.
-//import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import syndeticlogic.tiro.controller.ControllerMeta;
@@ -191,30 +189,32 @@ public class Tiro {
         return null;
     }
     
-    public static void main(String[] args) throws Exception {
-        Tiro t3happrentice = new Tiro(args);
-        if (!t3happrentice.parse()) {
+    public void run() throws Exception {        
+        if (!parse()) {
             log.fatal("Failed to parse the command line - exiting.");
             return;
         }
         
         int count = 0;
         do {
-        
-            List<TrialRunner> runners = t3happrentice.buildTrials();
-        
+            List<TrialRunner> runners = buildTrials();
             for(TrialRunner runner : runners) {
                 runner.startTrial();
-                if(!t3happrentice.concurrent) {
+                if(!concurrent) {
                     runner.waitForTrialCompletion();
                 }
             }
 
-            if(t3happrentice.concurrent){
+            if(concurrent){
                 for(TrialRunner runner : runners) {
                     runner.waitForTrialCompletion();
                 }
             }   
-        } while(++count < t3happrentice.retries);
-    }    
+        } while(++count < retries);
+    }        
+    
+    public static void main(String[] args) throws Exception {
+        Tiro apprentice = new Tiro(args);
+        apprentice.run();
+    }
 }
