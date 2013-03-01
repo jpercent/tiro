@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import syndeticlogic.tiro.controller.ControllerMeta;
 import syndeticlogic.tiro.controller.IORecord;
+import syndeticlogic.tiro.monitor.SystemMonitor;
 
 public class TrialResultCollector {
     final HashMap<Long, IOControllerResultDescriptor> trials;
@@ -17,8 +18,7 @@ public class TrialResultCollector {
     final Condition condition;
     boolean done;
 
-    public TrialResultCollector(TrialResultsJdbcDao jdbcDao, TrialMeta trialMeta, ControllerMeta controllerMeta) {
-        
+    public TrialResultCollector(TrialResultsJdbcDao jdbcDao, TrialMeta trialMeta, ControllerMeta controllerMeta) {    
         trials = new HashMap<Long, IOControllerResultDescriptor>();
         lock = new ReentrantLock();
         condition = lock.newCondition();
@@ -87,7 +87,7 @@ public class TrialResultCollector {
         }
     }
 
-    public void completeTrial(TrialMonitor monitor) {
+    public void completeTrial(SystemMonitor monitor) {
         
     }
     

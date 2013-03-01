@@ -6,15 +6,16 @@ import org.apache.commons.logging.LogFactory;
 import syndeticlogic.tiro.controller.IOController;
 import syndeticlogic.tiro.controller.IOExecutor;
 import syndeticlogic.tiro.controller.IORecord;
+import syndeticlogic.tiro.monitor.SystemMonitor;
 
 public class TrialRunner {
     private static final Log log = LogFactory.getLog(TrialRunner.class);
-    private final TrialMonitor monitor;
+    private final SystemMonitor monitor;
     private final IOController[] controllers;
     private final TrialResultCollector results;
     private final Thread[] runThreads;
     
-    public TrialRunner(TrialMonitor monitor, IOController[] controllers, TrialResultCollector results) {
+    public TrialRunner(SystemMonitor monitor, IOController[] controllers, TrialResultCollector results) {
         this.monitor = monitor;
         this.controllers = controllers;
         this.results = results;
