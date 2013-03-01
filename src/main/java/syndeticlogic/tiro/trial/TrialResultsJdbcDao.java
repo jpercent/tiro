@@ -16,11 +16,11 @@ import syndeticlogic.tiro.controller.ControllerMeta;
 import syndeticlogic.tiro.controller.IORecord;
 import syndeticlogic.tiro.monitor.IOMonitor;
 import syndeticlogic.tiro.monitor.MemoryMonitor;
+import syndeticlogic.tiro.trial.TrialMeta.TrialMetaRowMapper;
 
 import java.sql.PreparedStatement;
 
 public class TrialResultsJdbcDao {
-    private final RowMapper<TrialResult> rowMapper;
     private final JdbcTemplate jdbcTemplate;
     private final String driverClassName;
     private final String jdbcUrl;
@@ -112,7 +112,6 @@ public class TrialResultsJdbcDao {
         source.setDriverClassName(driverClassName);
         source.setUrl(jdbcUrl);
         jdbcTemplate = new JdbcTemplate(source);
-        rowMapper = new TrialResultMapper();
         trialsId = 0;
         controllersId = 0;
         ioRecordsId = 0;
@@ -126,8 +125,9 @@ public class TrialResultsJdbcDao {
             id = jdbcTemplate.queryForObject(query, Long.class);
         } catch (EmptyResultDataAccessException e) {
         }
+        System.out.println("id == "+id);
         if(id != -1) id++;
-        else id = 0;
+        else id = 1;
         return id;
     }
     
@@ -264,16 +264,11 @@ public class TrialResultsJdbcDao {
         });
     }
     
-    public List<TrialResult> adHocQuery(String sql, Map<String, Object> args) {
-        return jdbcTemplate.query(sql, rowMapper, args);
+    public List<Object> adHocQuery(String sql, RowMapper<?> rowMapper, Map<String, Object> args) {
+        return (List<Object>) jdbcTemplate.query(sql, rowMapper, args);
     }
-    
-    private class TrialResultMapper implements RowMapper<TrialResult> {
-        @Override
-        public TrialResult mapRow(ResultSet rs, int rowNum) throws SQLException {
-            TrialResult t = new TrialResult();
-            t.setDuration(rs.getLong("duration"));
-            return t;
-        }
+
+    public List adHocQuery(String sql, RowMapper<?> rowMapper) {
+        return (List<Object>) jdbcTemplate.query(sql, rowMapper);
     }
 }
