@@ -1,6 +1,5 @@
 package syndeticlogic.tiro.trial;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +14,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import syndeticlogic.tiro.controller.ControllerMeta;
 import syndeticlogic.tiro.controller.IORecord;
 import syndeticlogic.tiro.monitor.IOMonitor;
+import syndeticlogic.tiro.monitor.IOStats;
 import syndeticlogic.tiro.monitor.MemoryMonitor;
-import syndeticlogic.tiro.trial.TrialMeta.TrialMetaRowMapper;
+import syndeticlogic.tiro.monitor.MemoryStats;
 
 import java.sql.PreparedStatement;
 
@@ -164,7 +164,7 @@ public class TrialResultsJdbcDao {
         jdbcTemplate.update(insertTrial, trialsId++, meta.getId());
     }
     
-    public void completeTrial(IOMonitor iom, MemoryMonitor mm, long duration, long trialId) {
+    public void completeTrial(IOStats iom, MemoryStats mm, long duration, long trialId) {
         jdbcTemplate.update(completeTrial, duration, iom.getAverageMegabytesPerSecond(), iom.getAverageUserModeTime(), 
                 iom.getAverageSystemModeTime(), iom.getAverageSystemModeTime(), mm.getAverageFreePages(), 
                 mm.getAverageActivePages(), mm.getAverageInactivePages(), mm.getAverageWiredPages(), 
@@ -200,7 +200,7 @@ public class TrialResultsJdbcDao {
         });
     }
     
-    public void insertIOStats(IOMonitor monitor, final long trialId) {
+    public void insertIOStats(IOStats monitor, final long trialId) {
         final List<Double> kilobytesPerTransfer = monitor.getRawKiloBytesPerTranferMeasurements();
         final List<Double> transfersPerSecond = monitor.getRawTransfersPerSecond();
         final List<Double> megabytesPerSecond = monitor.getRawMegabytesPerSecond();
@@ -228,7 +228,7 @@ public class TrialResultsJdbcDao {
         });
     }
     
-    public void insertMemoryStats(MemoryMonitor monitor, final long trialId) {
+    public void insertMemoryStats(MemoryStats monitor, final long trialId) {
         final List<Long> freePages = monitor.getRawFreePageMeasurements();
         final List<Long> activePages = monitor.getRawActivePageMeasurements();
         final List<Long> inactivePages = monitor.getRawInactivePagesMeasurements();

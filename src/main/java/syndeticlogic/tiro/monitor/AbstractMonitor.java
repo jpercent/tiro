@@ -58,25 +58,7 @@ public abstract class AbstractMonitor implements Monitor {
 			process.destroy();
 		}
 	}
-	
-	public double computeAverage(List<?> values) {
-		if(values.get(0) instanceof Long) {
-			long sum = 0;
-			for(Object value : values) {
-				sum += (Long)value;
-			}
-			return (double)sum/(double)values.size();
-		} else if(values.get(0) instanceof Double) {
-			double sum = 0;
-			for(Object value : values) {
-				sum += (Double)value;
-			}
-			return sum/(double)values.size();
-		} else {
-			throw new RuntimeException("unsupported type");
-		}
-	}
-    
+
     public long getStart() {
         return start;
     }
@@ -100,4 +82,6 @@ public abstract class AbstractMonitor implements Monitor {
     public void setCommandAndArgs(String...commandAndArgs) {
         this.commandAndArgs = new ArrayList<String>(Arrays.asList(commandAndArgs));
     }
+    
+    abstract protected void processMonitorOutput(BufferedReader reader) throws IOException;
 }

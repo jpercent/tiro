@@ -4,37 +4,23 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.LinkedList;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
-	private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
-	private LinkedList<Double> kbt;
-	private LinkedList<Double> tps;
-	private LinkedList<Double> mbs;
-	
-	private LinkedList<Long> user;
-	private LinkedList<Long> system;
-	private LinkedList<Long> idle;
+    private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
+    private IOStats iostats;
+    private String device;
 
-	public OSXIOMonitor() {
+	public OSXIOMonitor(String device) {
 		super();
-		setCommandAndArgs("iostat", "5");
-		kbt = new LinkedList<Double>();
-		tps = new LinkedList<Double>();
-		mbs = new LinkedList<Double>();
-		user = new LinkedList<Long>();
-		system = new LinkedList<Long>();
-		idle = new LinkedList<Long>();
+		setCommandAndArgs("iostat", device, "5");
+		iostats = new IOStats();
 	}
-	
-	// AbstractMonitor
 	@Override
-	public void processMonitorOutput(BufferedReader reader) throws IOException {
+	protected void processMonitorOutput(BufferedReader reader) throws IOException {
 		reader.readLine();
 		reader.readLine();
 		reader.readLine();
@@ -48,86 +34,28 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			String[] values = line.split("\\s+");
 			assert values.length == 9;
 			int i = 0;
-			kbt.add(Double.parseDouble(values[i++]));
-			tps.add(Double.parseDouble(values[i++]));
-			mbs.add(Double.parseDouble(values[i++]));
-			user.add(Long.parseLong(values[i++]));
-			system.add(Long.parseLong(values[i++]));
-			idle.add(Long.parseLong(values[i++]));
+			Double kbt = Double.parseDouble(values[i++]);
+			Double tps = Double.parseDouble(values[i++]);
+			Double mbs = Double.parseDouble(values[i++]);		
+			Long user = Long.parseLong(values[i++]);
+			Long system = Long.parseLong(values[i++]);
+			Long idle = Long.parseLong(values[i++]);
+			iostats.addRawRecord(kbt, tps, mbs, user, system, idle);
 		}
 	}
-
-	@Override
-	public void dumpData() {
-		System.out.println("Kilobytes per Transfer: "+kbt);
-		System.out.println("Transfers per Second:   "+tps);
-		System.out.println("Megabytes per Transfer: "+mbs);
-		System.out.println("User Mode Time:         "+user);
-		System.out.println("System Mode Time:       "+system);
-		System.out.println("Idle Time:              "+idle);
-	}
-	
-	// IOMonitor
-	@Override
-	public double getAverageKilobytesPerTransfer() {
-		return computeAverage(kbt);
-	}
-	
-	@Override
-	public List<Double> getRawKiloBytesPerTranferMeasurements() {
-		return kbt;
-	}
-	
-	@Override
-	public double getAverageTransfersPerSecond() {
-		return computeAverage(tps);
-	}
-	
-	@Override
-	public List<Double> getRawTransfersPerSecond()  {
-		return tps;
-	}
-	
-	@Override
-	public double getAverageMegabytesPerSecond() {
-		return computeAverage(mbs);
-	}
-	
-	@Override
-	public List<Double> getRawMegabytesPerSecond()  {
-		return mbs;
-	}
-	
-	@Override
-	public double getAverageUserModeTime() {
-		return computeAverage(user);
-	}
-	
-	@Override
-	public List<Long> getRawUserModeTime(){
-		return user;
-	}
-	
-	@Override
-	public double getAverageSystemModeTime()  {
-		return computeAverage(system);
-	}
-	
-	@Override
-	public List<Long> getRawSystemModeTime(){
-		return system;
-	}
-	
-	@Override
-	public double getAverageIdleModeTime()  {
-		return computeAverage(idle);
-	}
-	
-	@Override
-	public List<Long> getRawIdleModeTime() {
-		return idle;
-	}
-	
+    @Override
+    public void dumpData() {
+        iostats.dumpData();
+    }
+    @Override
+    public IOStats getIOStats() {
+        return iostats;
+    }
+    @Override
+    public String getDevice() {
+        return device;
+    }
+    
 	public static void useDisk() throws IOException {
 		File file = new File("iomonitor.perf");
 		FileOutputStream out = new FileOutputStream(file);
@@ -159,7 +87,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 	public static void main(String[] args) throws Throwable {
 		try {
 			long starttime = System.currentTimeMillis();
-			OSXIOMonitor iom = new OSXIOMonitor();
+			OSXIOMonitor iom = new OSXIOMonitor("disk0");
 			System.out.println("Starting..");
 			iom.start();
 			Thread.sleep(1000);
@@ -180,7 +108,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			log.error("exception: ", t);
 			throw t;
 		}
-	}	
+	}
 }
 
 
