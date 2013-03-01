@@ -5,8 +5,6 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import syndeticlogic.tiro.trial.TrialMeta;
-
 public class ControllerMeta {
     public enum ControllerType {SequentialScan, SequentialWrite, RandomRead, RandomWrite, Random};
     public enum ExecutorType {SyncFileChannel, SyncCatena};
