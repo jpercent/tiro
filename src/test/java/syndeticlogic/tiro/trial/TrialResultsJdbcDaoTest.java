@@ -3,7 +3,6 @@ package syndeticlogic.tiro.trial;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import syndeticlogic.tiro.Tiro;
+import syndeticlogic.tiro.controller.ControllerMeta;
 
 public class TrialResultsJdbcDaoTest {
     TrialResultsJdbcDao jdbcDao;
@@ -38,16 +38,25 @@ public class TrialResultsJdbcDaoTest {
         assertEquals(-1, meta.getId());
         jdbcDao.insertTrialMeta(meta);
         assertEquals(1, meta.getId());
-        List trialMetas = jdbcDao.adHocQuery("select * from trials_meta", new TrialMeta.TrialMetaRowMapper());
-        System.out.println("TrialMetas = "+trialMetas);
-        assertEquals(1, trialMetas.size());
-        assertTrue(meta != trialMetas.get(0));
-        assertTrue(meta.equals(trialMetas.get(0)));
+        List trialsMeta = jdbcDao.adHocQuery("select * from trials_meta", new TrialMeta.TrialMetaRowMapper());
+        System.out.println("TrialMetas = "+trialsMeta);
+        assertEquals(1, trialsMeta.size());
+        assertTrue(meta != trialsMeta.get(0));
+        assertTrue(meta.equals(trialsMeta.get(0)));
     }
 
     @Test
     public void testInsertControllerMeta() {
-        fail("Not yet implemented");
+        ControllerMeta meta = new ControllerMeta("sequentialscan", "syncfilechannel", "java", "device");
+        assertEquals(-1, meta.getId());
+        jdbcDao.insertControllerMeta(meta);
+        assertEquals(1, meta.getId());
+        List controllersMeta = jdbcDao.adHocQuery("select * from controllers_meta", new ControllerMeta.ControllerMetaRowMapper());
+        System.out.println("ControllersMeta = "+controllersMeta);
+        assertEquals(1, controllersMeta.size());
+        assertTrue(meta != controllersMeta.get(0));
+        assertTrue(meta.equals(controllersMeta.get(0)));
+        
     }
 
     @Test
