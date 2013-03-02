@@ -29,7 +29,7 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
     }
     @Override
     protected void processMonitorOutput(BufferedReader reader) throws IOException {
-        throw new RuntimeException("unsupported method call");
+        throw new RuntimeException("unsupported");
     }
     @Override
     public IOStats getIOStats() {
