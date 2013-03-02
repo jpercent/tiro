@@ -43,4 +43,16 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
     public String getDevice() {
         return ioMonitor.getDevice();
     }
+    @Override
+    public long getStart() {
+        return ioMonitor.getStart();
+    }
+    @Override
+    public long getFinish() {
+        return ioMonitor.getFinish();
+    }
+    @Override
+    public long getDurationMillis() {
+        return ioMonitor.getDurationMillis();
+    }
 }
