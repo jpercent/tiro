@@ -23,16 +23,16 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import syndeticlogic.tiro.controller.ControllerMeta;
-import syndeticlogic.tiro.trial.TrialMeta;
-import syndeticlogic.tiro.trial.TrialResultsJdbcDao;
+import syndeticlogic.tiro.persistence.ControllerMeta;
+import syndeticlogic.tiro.persistence.JdbcDao;
+import syndeticlogic.tiro.persistence.TrialMeta;
 import syndeticlogic.tiro.trial.TrialRunner;
 
 public class Tiro {
     
     public static TrialRunner createSequentialScanTrial() throws Exception {
         //Properties p = .load("catena-perf-sql.properties");
-        //TrialResultsJdbcDao results = new TrialResultsJdbcDao(p);
+        //JdbcDao results = new JdbcDao(p);
         //results.insertTrialMeta();
         //results.insertTrial();
         //results.insertController();
@@ -53,7 +53,7 @@ public class Tiro {
     private String[] args;
     private static final Log log = LogFactory.getLog(Tiro.class);
     private Map<String,Object> config;
-    private final TrialResultsJdbcDao jdbcDao;
+    private final JdbcDao jdbcDao;
     private int retries;
     private boolean concurrent;
     private boolean init;
@@ -95,7 +95,7 @@ public class Tiro {
             options.addOption(properties);
             options.addOption(retries);
             parser = new GnuParser();
-            jdbcDao = new TrialResultsJdbcDao(Tiro.load("tiro-sqlite.properties"));
+            jdbcDao = new JdbcDao(Tiro.load("tiro-sqlite.properties"));
             
         }
     
