@@ -13,9 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import syndeticlogic.tiro.controller.ControllerMeta;
 import syndeticlogic.tiro.controller.IORecord;
-import syndeticlogic.tiro.monitor.IOMonitor;
 import syndeticlogic.tiro.monitor.IOStats;
-import syndeticlogic.tiro.monitor.MemoryMonitor;
 import syndeticlogic.tiro.monitor.MemoryStats;
 
 import java.sql.PreparedStatement;
@@ -264,11 +262,11 @@ public class TrialResultsJdbcDao {
         });
     }
     
-    public List<Object> adHocQuery(String sql, RowMapper<?> rowMapper, Map<String, Object> args) {
-        return (List<Object>) jdbcTemplate.query(sql, rowMapper, args);
+    public List<?> adHocQuery(String sql, RowMapper<?> rowMapper, Map<String, Object> args) {
+        return jdbcTemplate.query(sql, rowMapper, args);
     }
 
-    public List adHocQuery(String sql, RowMapper<?> rowMapper) {
-        return (List<Object>) jdbcTemplate.query(sql, rowMapper);
+    public List<?> adHocQuery(String sql, RowMapper<?> rowMapper) {
+        return jdbcTemplate.query(sql, rowMapper);
     }
 }
