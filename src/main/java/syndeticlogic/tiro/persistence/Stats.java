@@ -3,7 +3,6 @@ package syndeticlogic.tiro.persistence;
 import java.util.List;
 
 public class Stats {
-	
 	public static double computeAverage(List<?> values) {
 		if(values.get(0) instanceof Long) {
 			long sum = 0;
