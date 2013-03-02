@@ -1,6 +1,6 @@
 package syndeticlogic.tiro.controller;
 
-import syndeticlogic.tiro.controller.ControllerMeta.MemoryType;
+import syndeticlogic.tiro.persistence.ControllerMeta.MemoryType;
 
 public interface IOController {
     Long getId();

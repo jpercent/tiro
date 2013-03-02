@@ -3,6 +3,9 @@ package syndeticlogic.tiro.monitor;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import syndeticlogic.tiro.persistence.IOStats;
+import syndeticlogic.tiro.persistence.MemoryStats;
+
 public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOMonitor {
 	private MemoryMonitor memoryMonitor;
 	private IOMonitor ioMonitor;

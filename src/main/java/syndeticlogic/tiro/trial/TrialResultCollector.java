@@ -7,22 +7,27 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import syndeticlogic.tiro.controller.ControllerMeta;
 import syndeticlogic.tiro.controller.IORecord;
 import syndeticlogic.tiro.monitor.SystemMonitor;
+import syndeticlogic.tiro.persistence.Controller;
+import syndeticlogic.tiro.persistence.JdbcDao;
+import syndeticlogic.tiro.persistence.Trial;
 
 public class TrialResultCollector {
+    final JdbcDao jdbcDao;
     final HashMap<Long, IOControllerResultDescriptor> trials;
     final Thread serializer;
     final ReentrantLock lock;
     final Condition condition;
     boolean done;
 
-    public TrialResultCollector(TrialResultsJdbcDao jdbcDao, TrialMeta trialMeta, ControllerMeta controllerMeta) {    
+    public TrialResultCollector(JdbcDao jdbcDao) {    
+        this.jdbcDao = jdbcDao;
         trials = new HashMap<Long, IOControllerResultDescriptor>();
         lock = new ReentrantLock();
         condition = lock.newCondition();
         done = false;
+
         serializer = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -31,9 +36,8 @@ public class TrialResultCollector {
                     while (!done) {
                         try {
                             condition.await();
-
+                            throw new RuntimeException("fix me");
                         } catch (InterruptedException e) {
-
                             e.printStackTrace();
                         }
                     }
@@ -42,6 +46,11 @@ public class TrialResultCollector {
                 }
             }
         });
+    }
+    
+    public void beginTrial(Trial trial, Controller[] controllers) {
+        jdbcDao.insertTrial(trial);
+        jdbcDao.insertControllers(controllers);
     }
     
     public void addIORecord(IORecord ioDescriptor) {
@@ -79,6 +88,7 @@ public class TrialResultCollector {
         try {
             if (trials.containsKey(controllerId)) {
                 trials.get(controllerId).duration = duration;
+                jdbcDao.completeController(controllerId, duration);
             } else {
                 throw new RuntimeException("attempted to complete a trial that didn't create any records");
             }
@@ -87,8 +97,8 @@ public class TrialResultCollector {
         }
     }
 
-    public void completeTrial(SystemMonitor monitor) {
-        
+    public void completeTrial(Long trialId, SystemMonitor monitor, long duration) {
+        jdbcDao.completeTrial(monitor.getIOStats(), monitor.getMemoryStats(), duration, trialId);
     }
     
     public class IOControllerResultDescriptor {

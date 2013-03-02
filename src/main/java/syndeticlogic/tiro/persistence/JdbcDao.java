@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.trial;
+package syndeticlogic.tiro.persistence;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -11,14 +11,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import syndeticlogic.tiro.controller.ControllerMeta;
 import syndeticlogic.tiro.controller.IORecord;
-import syndeticlogic.tiro.monitor.IOStats;
-import syndeticlogic.tiro.monitor.MemoryStats;
 
 import java.sql.PreparedStatement;
 
-public class TrialResultsJdbcDao {
+public class JdbcDao {
     private final JdbcTemplate jdbcTemplate;
     private final String driverClassName;
     private final String jdbcUrl;
@@ -55,14 +52,13 @@ public class TrialResultsJdbcDao {
     private long ioRecordsId;
     private long ioStatsId;
     private long memoryStatsId;
-   
     // derby driverclassname == org.apache.derby.jdbc.EmbeddedDriver
     // derby jdbcUrl == jdbc:derby://localhost:21529/tmp/catena/trial_results;create=true
     // postgres driverClassName == org.postgresql.Driver
     // postres jdbcUrl == jdbc:postgresql://localhost:5432/catena?user=james&password=password
     // sqlite driverClassName == org.sqlite.JDBC
     // sqlite jdburl == jdbc:sqlite:trial-result.db;foreign keys=true?user=james&password=password
-    public TrialResultsJdbcDao(Properties config) {
+    public JdbcDao(Properties config) {
         this.driverClassName = config.getProperty("driver-class-name");
         this.jdbcUrl = config.getProperty("jdbc-url");
         assert driverClassName != null && jdbcUrl != null;
@@ -130,10 +126,12 @@ public class TrialResultsJdbcDao {
     }
     
     public void initialize() {
-        controllersId = getId(selectControllersLast);
-        ioRecordsId = getId(selectIORecordsLast);
-        ioStatsId = getId(selectIOStatsLast);
-        memoryStatsId = getId(selectMemoryStatsLast);
+        synchronized(this) {
+            controllersId = getId(selectControllersLast);
+            ioRecordsId = getId(selectIORecordsLast);
+            ioStatsId = getId(selectIOStatsLast);
+            memoryStatsId = getId(selectMemoryStatsLast);
+        }
     }
     
     public void createTables() {
@@ -158,8 +156,11 @@ public class TrialResultsJdbcDao {
         controllerMeta.setId(jdbcTemplate.queryForLong(selectControllersMetaLast));
     }
     
-    public void insertTrial(TrialMeta meta) {
-        jdbcTemplate.update(insertTrial, trialsId++, meta.getId());
+    public void insertTrial(Trial trial) {
+        synchronized(this) {
+            trial.setId(trialsId++);
+        }
+        jdbcTemplate.update(insertTrial, trial.getId() , trial.getMeta().getId());
     }
     
     public void completeTrial(IOStats iom, MemoryStats mm, long duration, long trialId) {
@@ -170,8 +171,32 @@ public class TrialResultsJdbcDao {
                 mm.getAveragePageIns(), mm.getAveragePageOuts(), trialId);
     }
             
-    public void insertController(TrialMeta tmeta, ControllerMeta cmeta) {
-        jdbcTemplate.update(insertController, controllersId++, tmeta.getId(), cmeta.getId());
+    public void insertController(Controller controller) { 
+        synchronized(this) {
+            controller.setId(controllersId++);
+        }
+        jdbcTemplate.update(insertController, controller.getId(), controller.getTrialMeta().getId(), controller.getControllerMeta().getId());
+    }
+    
+    public void insertControllers(final Controller[] controllers) {
+        final long id;
+        synchronized(this) {
+            id = controllersId;
+            controllersId += controllers.length;
+        }
+        jdbcTemplate.batchUpdate(insertIORecord, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                controllers[i].setId(id+i);
+                ps.setLong(1, id+i);
+                ps.setLong(2, controllers[i].getTrialMeta().getId());
+                ps.setLong(3, controllers[i].getTrialMeta().getId());
+            }
+            @Override
+            public int getBatchSize() {
+                return controllers.length;
+            }
+        });
     }
     
     public void completeController(long controllerId, long duration) {
@@ -179,8 +204,11 @@ public class TrialResultsJdbcDao {
     }
     
     public void insertIORecord(final IORecord[] records) {
-        final long id = ioRecordsId;
-        ioRecordsId += records.length;
+        final long id;
+        synchronized(this) {
+            id = ioRecordsId;
+            ioRecordsId += records.length;
+        }
         jdbcTemplate.batchUpdate(insertIORecord, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -205,8 +233,11 @@ public class TrialResultsJdbcDao {
         final List<Long> userMode = monitor.getRawUserModeTime();
         final List<Long> systemMode = monitor.getRawSystemModeTime();
         final List<Long> idleMode = monitor.getRawIdleModeTime();
-        final long id = ioStatsId;
-        ioStatsId += idleMode.size();
+        final long id;
+        synchronized(this) {
+            id = ioStatsId;
+            ioStatsId += idleMode.size();
+        }
         jdbcTemplate.batchUpdate(insertIOStats, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -237,8 +268,11 @@ public class TrialResultsJdbcDao {
         final List<Long> reactivePages = monitor.getRawReactivatedPagesMeasurements();
         final List<Long> pageIns = monitor.getRawPageInMeasurements();
         final List<Long> pageOuts = monitor.getRawPageOutsMeasurements();
-        final long id = memoryStatsId;
-        memoryStatsId += freePages.size();
+        final long id;
+        synchronized(this) {
+            id = memoryStatsId;
+            memoryStatsId += freePages.size();
+        }
         jdbcTemplate.batchUpdate(insertMemoryStats, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {

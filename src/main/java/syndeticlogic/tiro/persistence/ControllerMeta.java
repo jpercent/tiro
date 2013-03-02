@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.controller;
+package syndeticlogic.tiro.persistence;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

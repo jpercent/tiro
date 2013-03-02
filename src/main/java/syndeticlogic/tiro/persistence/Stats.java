@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.monitor;
+package syndeticlogic.tiro.persistence;
 
 import java.util.List;
 

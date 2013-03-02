@@ -70,6 +70,6 @@ public class TrialRunner {
             runThreads[i].join();
         }
         monitor.finish();
-        results.completeTrial(monitor);
+        results.completeTrial(-1L, monitor, monitor.getDurationMillis());
     }
 }
