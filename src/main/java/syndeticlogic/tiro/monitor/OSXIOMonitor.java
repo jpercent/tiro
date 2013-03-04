@@ -22,8 +22,8 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 		super();
 		this.devices = devices;
 		String[] command = new String[devices.length+2];
-		command[0] = "iostate";
-		command[devices.length] = "5";
+		command[0] = "iostat";
+		command[devices.length+1] = "5";
 		System.arraycopy(devices, 0, command, 1, devices.length);
 		setCommandAndArgs(command);
 		iostats = new IOStats[devices.length];
@@ -45,7 +45,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			log.info(line);
 			line = line.trim();
 			String[] values = line.split("\\s+");
-			assert values.length == 9;
+			assert values.length == 3*devices.length+6;
 			int i = 0;
 			for(IOStats iostat : iostats) {
 			    Double kbt = Double.parseDouble(values[i++]);
@@ -110,7 +110,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 	public static void main(String[] args) throws Throwable {
 		try {
 			long starttime = System.currentTimeMillis();
-			OSXIOMonitor iom = new OSXIOMonitor("disk0");
+			OSXIOMonitor iom = new OSXIOMonitor("disk0");//, "disk1");
 			System.out.println("Starting..");
 			iom.start();
 			Thread.sleep(1000);
