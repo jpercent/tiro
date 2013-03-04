@@ -3,6 +3,7 @@ package syndeticlogic.tiro.monitor;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import syndeticlogic.tiro.persistence.CpuStats;
 import syndeticlogic.tiro.persistence.IOStats;
 import syndeticlogic.tiro.persistence.MemoryStats;
 
@@ -57,16 +58,20 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
         throw new RuntimeException("unsupported");
     }
     @Override
-    public IOStats getIOStats() {
+    public IOStats[] getIOStats() {
         return ioMonitor.getIOStats();
+    }
+    @Override
+    public String[] getDevices() {
+        return ioMonitor.getDevices();
     }
     @Override
     public MemoryStats getMemoryStats() {
         return memoryMonitor.getMemoryStats();
     }
     @Override
-    public String getDevice() {
-        return ioMonitor.getDevice();
+    public CpuStats getCpuStats() {
+        return ioMonitor.getCpuStats();
     }
     @Override
     public long getStart() {

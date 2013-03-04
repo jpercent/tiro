@@ -9,19 +9,30 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.tiro.persistence.CpuStats;
 import syndeticlogic.tiro.persistence.IOStats;
 
 public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
     private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
-    private IOStats iostats;
-    private String device;
+    private String[] devices;
+    private IOStats[] iostats;
+    private CpuStats cpustats;
 
-	public OSXIOMonitor(String device) {
+	public OSXIOMonitor(String... devices) {
 		super();
-		setCommandAndArgs("iostat", device, "5");
-		iostats = new IOStats();
+		this.devices = devices;
+		String[] command = new String[devices.length+2];
+		command[0] = "iostate";
+		command[devices.length] = "5";
+		System.arraycopy(devices, 0, command, 1, devices.length);
+		setCommandAndArgs(command);
+		iostats = new IOStats[devices.length];
+		for(int i = 0; i < devices.length; i++) {
+		    iostats[i] = new IOStats(devices[i]);
+		}
+		cpustats = new CpuStats();
 	}
-	@Override
+    @Override
 	protected void processMonitorOutput(BufferedReader reader) throws IOException {
 		reader.readLine();
 		reader.readLine();
@@ -36,26 +47,36 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			String[] values = line.split("\\s+");
 			assert values.length == 9;
 			int i = 0;
-			Double kbt = Double.parseDouble(values[i++]);
-			Double tps = Double.parseDouble(values[i++]);
-			Double mbs = Double.parseDouble(values[i++]);		
+			for(IOStats iostat : iostats) {
+			    Double kbt = Double.parseDouble(values[i++]);
+			    Double tps = Double.parseDouble(values[i++]);
+			    Double mbs = Double.parseDouble(values[i++]);
+			    iostat.addRawRecord(kbt, tps, mbs);
+			}
 			Long user = Long.parseLong(values[i++]);
 			Long system = Long.parseLong(values[i++]);
 			Long idle = Long.parseLong(values[i++]);
-			iostats.addRawRecord(kbt, tps, mbs, user, system, idle);
+			cpustats.addRawRecord(user, system, idle);
 		}
 	}
     @Override
     public void dumpData() {
-        iostats.dumpData();
+        for(IOStats iostat : iostats) {
+            iostat.dumpData();
+        } 
+        cpustats.dumpData();
     }
     @Override
-    public IOStats getIOStats() {
+    public IOStats[] getIOStats() {
         return iostats;
     }
     @Override
-    public String getDevice() {
-        return device;
+    public String[] getDevices() {
+        return devices;
+    }
+    @Override
+    public CpuStats getCpuStats() {
+        return cpustats;
     }
     
 	public static void useDisk() throws IOException {

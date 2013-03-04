@@ -27,6 +27,7 @@ public class JdbcDao {
     private final String createIORecords;
     private final String createIOStats;
     private final String createMemoryStats;
+    private final String createCpuStats;
     
     private final String insertTrialMeta;
     private final String insertControllerMeta;
@@ -35,6 +36,7 @@ public class JdbcDao {
     private final String insertIORecord;
     private final String insertIOStats;
     private final String insertMemoryStats;
+    private final String insertCpuStats;
     
     private final String selectTrialsMetaLast;
     private final String selectControllersMetaLast;
@@ -43,6 +45,7 @@ public class JdbcDao {
     private final String selectIORecordsLast;
     private final String selectIOStatsLast;
     private final String selectMemoryStatsLast;
+    private final String selectCpuStatsLast;
     
     private final String completeTrial;
     private final String completeController;
@@ -52,6 +55,7 @@ public class JdbcDao {
     private long ioRecordsId;
     private long ioStatsId;
     private long memoryStatsId;
+    private long cpuStatsId;
     // derby driverclassname == org.apache.derby.jdbc.EmbeddedDriver
     // derby jdbcUrl == jdbc:derby://localhost:21529/tmp/catena/trial_results;create=true
     // postgres driverClassName == org.postgresql.Driver
@@ -70,8 +74,9 @@ public class JdbcDao {
         this.createIORecords = config.getProperty("create-iorecords");
         this.createIOStats = config.getProperty("create-io-stats");
         this.createMemoryStats = config.getProperty("create-memory-stats");
+        this.createCpuStats = config.getProperty("create-cpu-stats");
         assert createTrialsMeta != null && createTrials != null && createControllersMeta !=null && createControllers != null 
-                && createIORecords != null && createIOStats != null && createMemoryStats != null;
+                && createIORecords != null && createIOStats != null && createMemoryStats != null && createCpuStats != null;
         
         this.insertTrialMeta = config.getProperty("insert-trial-meta"); 
         this.insertControllerMeta = config.getProperty("insert-controller-meta"); 
@@ -80,8 +85,9 @@ public class JdbcDao {
         this.insertIORecord = config.getProperty("insert-iorecord");
         this.insertIOStats = config.getProperty("insert-io-stats");
         this.insertMemoryStats = config.getProperty("insert-memory-stats");
+        this.insertCpuStats = config.getProperty("insert-cpu-stats");
         assert insertTrialMeta != null && insertControllerMeta != null && insertTrial != null && insertController != null
-                && insertIORecord != null && insertMemoryStats != null && insertIOStats != null;
+                && insertIORecord != null && insertMemoryStats != null && insertIOStats != null && insertCpuStats != null;
         
         this.selectTrialsMetaLast = config.getProperty("select-trials-meta-last-id");
         this.selectControllersMetaLast = config.getProperty("select-controllers-meta-last-id");
@@ -90,17 +96,15 @@ public class JdbcDao {
         this.selectIORecordsLast = config.getProperty("select-iorecords-last-id");
         this.selectIOStatsLast = config.getProperty("select-io-stats-last-id");
         this.selectMemoryStatsLast = config.getProperty("select-memory-stats-last-id");
+        this.selectCpuStatsLast = config.getProperty("select-cpu-stats-last-id");
         assert selectTrialsMetaLast != null && selectControllersMetaLast != null && selectTrialsLast != null 
                 && selectControllersLast != null && selectIORecordsLast != null && selectIOStatsLast != null 
-                && selectMemoryStatsLast != null;
+                        && selectMemoryStatsLast != null && selectCpuStatsLast != null;
         
         this.completeTrial = config.getProperty("complete-trial");
         this.completeController = config.getProperty("complete-controller");
         assert completeTrial != null && completeController != null; 
-        
-        boolean createTables = Boolean.parseBoolean(config.getProperty("create-tables"));
-        System.out.println("table s= value = "+"true".equals(config.getProperty("create-tables"))+createTables);
-        
+                
         // create data source connection
         DriverManagerDataSource source = new DriverManagerDataSource();
         source.setDriverClassName(driverClassName);
@@ -131,6 +135,7 @@ public class JdbcDao {
             ioRecordsId = getId(selectIORecordsLast);
             ioStatsId = getId(selectIOStatsLast);
             memoryStatsId = getId(selectMemoryStatsLast);
+            cpuStatsId = getId(selectCpuStatsLast);
         }
     }
     
@@ -142,6 +147,7 @@ public class JdbcDao {
         jdbcTemplate.execute(createIORecords);
         jdbcTemplate.execute(createIOStats);
         jdbcTemplate.execute(createMemoryStats);
+        jdbcTemplate.execute(createCpuStats);
     }
     
     public void insertTrialMeta(TrialMeta trialMeta) {
@@ -163,12 +169,12 @@ public class JdbcDao {
         jdbcTemplate.update(insertTrial, trial.getId() , trial.getMeta().getId());
     }
     
-    public void completeTrial(IOStats iom, MemoryStats mm, long duration, long trialId) {
-        jdbcTemplate.update(completeTrial, duration, iom.getAverageMegabytesPerSecond(), iom.getAverageUserModeTime(), 
-                iom.getAverageSystemModeTime(), iom.getAverageSystemModeTime(), mm.getAverageFreePages(), 
-                mm.getAverageActivePages(), mm.getAverageInactivePages(), mm.getAverageWiredPages(), 
-                mm.getAverageNumberOfFaultRoutineCalls(), mm.getAverageCopyOnWriteFaults(), mm.getAverageZeroFilledPages(),
-                mm.getAveragePageIns(), mm.getAveragePageOuts(), trialId);
+    public void completeTrial(AggregatedIOStats ioStats, CpuStats cpuStats, MemoryStats memoryStats, long duration, long trialId) {
+        jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
+                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageSystemModeTime(), memoryStats.getAverageFreePages(), 
+                memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
+                memoryStats.getAverageNumberOfFaultRoutineCalls(), memoryStats.getAverageCopyOnWriteFaults(), memoryStats.getAverageZeroFilledPages(),
+                memoryStats.getAveragePageIns(), memoryStats.getAveragePageOuts(), trialId);
     }
             
     public void insertController(Controller controller) { 
@@ -226,17 +232,15 @@ public class JdbcDao {
         });
     }
     
-    public void insertIOStats(IOStats monitor, final long trialId) {
-        final List<Double> kilobytesPerTransfer = monitor.getRawKiloBytesPerTranferMeasurements();
-        final List<Double> transfersPerSecond = monitor.getRawTransfersPerSecond();
-        final List<Double> megabytesPerSecond = monitor.getRawMegabytesPerSecond();
-        final List<Long> userMode = monitor.getRawUserModeTime();
-        final List<Long> systemMode = monitor.getRawSystemModeTime();
-        final List<Long> idleMode = monitor.getRawIdleModeTime();
+    public void insertIOStats(IOStats io, final long trialId) {
+        final List<Double> kilobytesPerTransfer = io.getRawKiloBytesPerTranferMeasurements();
+        final List<Double> transfersPerSecond = io.getRawTransfersPerSecond();
+        final List<Double> megabytesPerSecond = io.getRawMegabytesPerSecond();
         final long id;
+        
         synchronized(this) {
             id = ioStatsId;
-            ioStatsId += idleMode.size();
+            ioStatsId += megabytesPerSecond.size();
         }
         jdbcTemplate.batchUpdate(insertIOStats, new BatchPreparedStatementSetter() {
             @Override
@@ -246,17 +250,14 @@ public class JdbcDao {
                 ps.setDouble(3, kilobytesPerTransfer.get(i));
                 ps.setDouble(4, transfersPerSecond.get(i));
                 ps.setDouble(5, megabytesPerSecond.get(i));
-                ps.setLong(6, userMode.get(i));
-                ps.setLong(7, systemMode.get(i));
-                ps.setLong(8, idleMode.get(i));
             }
             @Override
             public int getBatchSize() {
-                return idleMode.size();
+                return megabytesPerSecond.size();
             }
         });
     }
-    
+
     public void insertMemoryStats(MemoryStats monitor, final long trialId) {
         final List<Long> freePages = monitor.getRawFreePageMeasurements();
         final List<Long> activePages = monitor.getRawActivePageMeasurements();
@@ -292,6 +293,31 @@ public class JdbcDao {
             @Override
             public int getBatchSize() {
                 return freePages.size();
+            }
+        });
+    }
+
+    public void insertCpuStats(CpuStats cpu, final long trialId) {
+        final List<Long> userMode = cpu.getRawUserModeTime();
+        final List<Long> systemMode = cpu.getRawSystemModeTime();
+        final List<Long> idleMode = cpu.getRawIdleModeTime();
+        final long id;
+        synchronized(this) {
+            id = ioStatsId;
+            ioStatsId += idleMode.size();
+        }
+        jdbcTemplate.batchUpdate(insertCpuStats, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, id+i);
+                ps.setLong(2, trialId);
+                ps.setLong(3, userMode.get(i));
+                ps.setLong(4, systemMode.get(i));
+                ps.setLong(5, idleMode.get(i));
+            }
+            @Override
+            public int getBatchSize() {
+                return idleMode.size();
             }
         });
     }
