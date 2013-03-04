@@ -11,8 +11,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.tiro.monitor.Monitor.Platform;
-
 public abstract class AbstractMonitor implements Monitor {
 	private Log log = LogFactory.getLog(AbstractMonitor.class);	
 	private List<String> commandAndArgs;
