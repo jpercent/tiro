@@ -13,11 +13,11 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
 	private enum State { Created, Started, Finished };
 	private State state = State.Created;
 	
-	public static SystemMonitor createSystemMonitor(String device) {
+	public static SystemMonitor createSystemMonitor(String[] devices) {
 	    final SystemMonitor monitor;
 	    switch(AbstractMonitor.getPlatform()) {
 	    case OSX:
-	        monitor = new SystemMonitor(new OSXMemoryMonitor(), new OSXIOMonitor(device));
+	        monitor = new SystemMonitor(new OSXMemoryMonitor(), new OSXIOMonitor(devices));
 	        break;
 	    case Linux:
 	    case Windows:
