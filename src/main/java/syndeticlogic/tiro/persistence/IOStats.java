@@ -86,4 +86,59 @@ public class IOStats {
         System.out.println("System Mode Time:       "+system);
         System.out.println("Idle Time:              "+idle);
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((idle == null) ? 0 : idle.hashCode());
+        result = prime * result + ((kbt == null) ? 0 : kbt.hashCode());
+        result = prime * result + ((mbs == null) ? 0 : mbs.hashCode());
+        result = prime * result + ((system == null) ? 0 : system.hashCode());
+        result = prime * result + ((tps == null) ? 0 : tps.hashCode());
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        IOStats other = (IOStats) obj;
+        if (idle == null) {
+            if (other.idle != null)
+                return false;
+        } else if (!idle.equals(other.idle))
+            return false;
+        if (kbt == null) {
+            if (other.kbt != null)
+                return false;
+        } else if (!kbt.equals(other.kbt))
+            return false;
+        if (mbs == null) {
+            if (other.mbs != null)
+                return false;
+        } else if (!mbs.equals(other.mbs))
+            return false;
+        if (system == null) {
+            if (other.system != null)
+                return false;
+        } else if (!system.equals(other.system))
+            return false;
+        if (tps == null) {
+            if (other.tps != null)
+                return false;
+        } else if (!tps.equals(other.tps))
+            return false;
+        if (user == null) {
+            if (other.user != null)
+                return false;
+        } else if (!user.equals(other.user))
+            return false;
+        return true;
+    }
 }

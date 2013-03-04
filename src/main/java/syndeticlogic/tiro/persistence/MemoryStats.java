@@ -146,5 +146,90 @@ public class MemoryStats {
         System.out.println("Page ins:             "+pageIns);
         System.out.println("Page outs:            "+pageOuts);
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((activePages == null) ? 0 : activePages.hashCode());
+        result = prime * result + ((copyOnWriteFaults == null) ? 0 : copyOnWriteFaults.hashCode());
+        result = prime * result + ((faultRoutineCalls == null) ? 0 : faultRoutineCalls.hashCode());
+        result = prime * result + ((freePages == null) ? 0 : freePages.hashCode());
+        result = prime * result + ((inactivePages == null) ? 0 : inactivePages.hashCode());
+        result = prime * result + ((pageIns == null) ? 0 : pageIns.hashCode());
+        result = prime * result + ((pageOuts == null) ? 0 : pageOuts.hashCode());
+        result = prime * result + ((reactivePages == null) ? 0 : reactivePages.hashCode());
+        result = prime * result + ((speculative == null) ? 0 : speculative.hashCode());
+        result = prime * result + ((wiredPages == null) ? 0 : wiredPages.hashCode());
+        result = prime * result + ((zeroFilledPages == null) ? 0 : zeroFilledPages.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MemoryStats other = (MemoryStats) obj;
+        if (activePages == null) {
+            if (other.activePages != null)
+                return false;
+        } else if (!activePages.equals(other.activePages))
+            return false;
+        if (copyOnWriteFaults == null) {
+            if (other.copyOnWriteFaults != null)
+                return false;
+        } else if (!copyOnWriteFaults.equals(other.copyOnWriteFaults))
+            return false;
+        if (faultRoutineCalls == null) {
+            if (other.faultRoutineCalls != null)
+                return false;
+        } else if (!faultRoutineCalls.equals(other.faultRoutineCalls))
+            return false;
+        if (freePages == null) {
+            if (other.freePages != null)
+                return false;
+        } else if (!freePages.equals(other.freePages))
+            return false;
+        if (inactivePages == null) {
+            if (other.inactivePages != null)
+                return false;
+        } else if (!inactivePages.equals(other.inactivePages))
+            return false;
+        if (pageIns == null) {
+            if (other.pageIns != null)
+                return false;
+        } else if (!pageIns.equals(other.pageIns))
+            return false;
+        if (pageOuts == null) {
+            if (other.pageOuts != null)
+                return false;
+        } else if (!pageOuts.equals(other.pageOuts))
+            return false;
+        if (reactivePages == null) {
+            if (other.reactivePages != null)
+                return false;
+        } else if (!reactivePages.equals(other.reactivePages))
+            return false;
+        if (speculative == null) {
+            if (other.speculative != null)
+                return false;
+        } else if (!speculative.equals(other.speculative))
+            return false;
+        if (wiredPages == null) {
+            if (other.wiredPages != null)
+                return false;
+        } else if (!wiredPages.equals(other.wiredPages))
+            return false;
+        if (zeroFilledPages == null) {
+            if (other.zeroFilledPages != null)
+                return false;
+        } else if (!zeroFilledPages.equals(other.zeroFilledPages))
+            return false;
+        return true;
+    }
     
 }
