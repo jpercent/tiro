@@ -169,7 +169,7 @@ public class JdbcDao {
         jdbcTemplate.update(insertTrial, trial.getId() , trial.getMeta().getId());
     }
     
-    public void completeTrial(AggregatedIOStats ioStats, CpuStats cpuStats, MemoryStats memoryStats, long duration, long trialId) {
+    public void completeTrial(AggregatedIOStats ioStats, MemoryStats memoryStats, CpuStats cpuStats, long duration, long trialId) {
         jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
                 cpuStats.getAverageSystemModeTime(), cpuStats.getAverageSystemModeTime(), memoryStats.getAverageFreePages(), 
                 memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
