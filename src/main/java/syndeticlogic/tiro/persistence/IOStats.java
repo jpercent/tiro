@@ -4,10 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class IOStats {
-    private String device;
-    private LinkedList<Double> kbt;
-    private LinkedList<Double> tps;
-    private LinkedList<Double> mbs;
+    private final String device;
+    private final LinkedList<Double> kbt;
+    private final LinkedList<Double> tps;
+    private final LinkedList<Double> mbs;
     
     public IOStats(String device) {
         this.device = device;
@@ -15,6 +15,10 @@ public class IOStats {
         tps = new LinkedList<Double>();
         mbs = new LinkedList<Double>();
     }    
+    
+    public String getDevice() {
+        return device;
+    }
     
     public double getAverageKilobytesPerTransfer() {
         return Stats.computeAverage(kbt);
