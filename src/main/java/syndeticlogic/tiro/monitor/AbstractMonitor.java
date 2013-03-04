@@ -11,8 +11,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.tiro.monitor.Monitor.Platform;
+
 public abstract class AbstractMonitor implements Monitor {
-	private Log log = LogFactory.getLog(AbstractMonitor.class);
+	private Log log = LogFactory.getLog(AbstractMonitor.class);	
 	private List<String> commandAndArgs;
 	private Process process;
 	private long start;
@@ -84,4 +86,13 @@ public abstract class AbstractMonitor implements Monitor {
     }
     
     abstract protected void processMonitorOutput(BufferedReader reader) throws IOException;
+    
+    private static Platform platform;
+    public static Platform getPlatform() {
+        return platform;
+    }
+    
+    public static void setPlatform(Platform platform) {
+        AbstractMonitor.platform = platform;
+    }
 }

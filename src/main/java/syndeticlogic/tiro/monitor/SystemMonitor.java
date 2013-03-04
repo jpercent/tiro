@@ -13,9 +13,9 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
 	private enum State { Created, Started, Finished };
 	private State state = State.Created;
 	
-	public static SystemMonitor createSystemMonitor(Monitor.Platform platform, String device) {
+	public static SystemMonitor createSystemMonitor(String device) {
 	    final SystemMonitor monitor;
-	    switch(platform) {
+	    switch(AbstractMonitor.getPlatform()) {
 	    case OSX:
 	        monitor = new SystemMonitor(new OSXMemoryMonitor(), new OSXIOMonitor(device));
 	        break;
@@ -26,7 +26,7 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
 	    }
 	    return monitor;
 	}
-	
+
 	public SystemMonitor(MemoryMonitor memoryMonitor, IOMonitor ioMonitor) {
 	    super();
 	    this.memoryMonitor = memoryMonitor;
