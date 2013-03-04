@@ -9,7 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import syndeticlogic.tiro.controller.IORecord;
 import syndeticlogic.tiro.monitor.SystemMonitor;
+import syndeticlogic.tiro.persistence.AggregatedIOStats;
 import syndeticlogic.tiro.persistence.Controller;
+import syndeticlogic.tiro.persistence.IOStats;
 import syndeticlogic.tiro.persistence.JdbcDao;
 import syndeticlogic.tiro.persistence.Trial;
 
@@ -98,7 +100,12 @@ public class TrialResultCollector {
     }
 
     public void completeTrial(Long trialId, SystemMonitor monitor, long duration) {
-        jdbcDao.completeTrial(monitor.getIOStats(), monitor.getMemoryStats(), duration, trialId);
+        HashMap<String, IOStats> iostatsByDevice = new HashMap<String, IOStats>();
+        for(IOStats iostat : monitor.getIOStats())
+            iostatsByDevice.put(iostat.getDevice(), iostat);
+
+        AggregatedIOStats aggregatedIOStats = new AggregatedIOStats(iostatsByDevice);
+        jdbcDao.completeTrial(aggregatedIOStats, monitor.getMemoryStats(), monitor.getCpuStats(), duration, trialId);
     }
     
     public class IOControllerResultDescriptor {
