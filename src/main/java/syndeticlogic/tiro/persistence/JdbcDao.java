@@ -115,6 +115,7 @@ public class JdbcDao {
         ioRecordsId = 0;
         ioStatsId = 0;
         memoryStatsId = 0;
+        cpuStatsId = 0;
     }
     
     private long getId(String query) {
@@ -303,8 +304,8 @@ public class JdbcDao {
         final List<Long> idleMode = cpu.getRawIdleModeTime();
         final long id;
         synchronized(this) {
-            id = ioStatsId;
-            ioStatsId += idleMode.size();
+            id = cpuStatsId;
+            cpuStatsId += idleMode.size();
         }
         jdbcTemplate.batchUpdate(insertCpuStats, new BatchPreparedStatementSetter() {
             @Override
