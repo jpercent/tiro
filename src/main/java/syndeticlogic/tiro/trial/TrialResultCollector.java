@@ -48,6 +48,7 @@ public class TrialResultCollector {
                 }
             }
         });
+        serializer.start();
     }
     
     public void beginTrial(Trial trial, Controller[] controllers) {

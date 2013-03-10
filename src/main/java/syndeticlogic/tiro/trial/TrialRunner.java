@@ -7,29 +7,40 @@ import syndeticlogic.tiro.controller.IOController;
 import syndeticlogic.tiro.controller.IOExecutor;
 import syndeticlogic.tiro.controller.IORecord;
 import syndeticlogic.tiro.monitor.SystemMonitor;
+import syndeticlogic.tiro.persistence.Controller;
+import syndeticlogic.tiro.persistence.Trial;
 
 public class TrialRunner {
     private static final Log log = LogFactory.getLog(TrialRunner.class);
+    //
+    public static volatile in
+    private final Trial trial;
+    private final Controller[] controllers;
     private final SystemMonitor monitor;
-    private final IOController[] controllers;
+    private final IOController[] ioControllers;
     private final TrialResultCollector results;
     private final Thread[] runThreads;
     
-    public TrialRunner(SystemMonitor monitor, IOController[] controllers, TrialResultCollector results) {
+    public TrialRunner(Trial trial, Controller[] controllerModels, SystemMonitor monitor, IOController[] controllers, TrialResultCollector results) {
+        this.trial = trial;
+        this.controllers = controllerModels;
         this.monitor = monitor;
-        this.controllers = controllers;
+        this.ioControllers = controllers;
         this.results = results;
         runThreads = new Thread[controllers.length];
     }
     
     public void startTrial() {
         monitor.start();
-        for(int i = 0; i < controllers.length; i++) {
-            runThreads[i] = startThread(controllers[i]);
+        results.beginTrial(trial, controllers);
+        for(int i = 0; i < ioControllers.length; i++) {
+            runThreads[i] = startThread(ioControllers[i]);
         }
+
     }
     
     public Thread startThread(final IOController controller) {
+        
         Thread runThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -70,6 +81,6 @@ public class TrialRunner {
             runThreads[i].join();
         }
         monitor.finish();
-        results.completeTrial(-1L, monitor, monitor.getDurationMillis());
+        results.completeTrial(trial.getId(), monitor, monitor.getDurationMillis());
     }
 }
