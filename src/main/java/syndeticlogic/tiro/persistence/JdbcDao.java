@@ -209,25 +209,25 @@ public class JdbcDao {
         jdbcTemplate.update(completeController, duration);
     }
     
-    public void insertIORecord(final IORecord[] records) {
+    public void insertIORecord(final List<IORecord> records) {
         final long id;
         synchronized(this) {
             id = ioRecordsId;
-            ioRecordsId += records.length;
+            ioRecordsId += records.size();
         }
         jdbcTemplate.batchUpdate(insertIORecord, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, id+i);
-                ps.setLong(2, records[i].getControllerId());
-                ps.setLong(3, records[i].getLba());
-                ps.setLong(4, records[i].getDuration());
-                ps.setInt(5, records[i].getSize());
-                ps.setString(6, records[i].getStrategyName());
+                ps.setLong(2, records.get(i).getControllerId());
+                ps.setLong(3, records.get(i).getLba());
+                ps.setLong(4, records.get(i).getDuration());
+                ps.setInt(5, records.get(i).getSize());
+                ps.setString(6, records.get(i).getStrategyName());
             }
             @Override
             public int getBatchSize() {
-                return records.length;
+                return records.size();
             }
         });
     }
