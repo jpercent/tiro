@@ -12,7 +12,7 @@ import syndeticlogic.tiro.monitor.SystemMonitor;
 import syndeticlogic.tiro.persistence.AggregatedIOStats;
 import syndeticlogic.tiro.persistence.Controller;
 import syndeticlogic.tiro.persistence.IORecord;
-import syndeticlogic.tiro.persistence.IOStats;
+import syndeticlogic.tiro.persistence.OSXIOStats;
 import syndeticlogic.tiro.persistence.JdbcDao;
 import syndeticlogic.tiro.persistence.Trial;
 
@@ -127,8 +127,8 @@ public class TrialResultCollector {
     }
 
     public void completeTrial(Long trialId, SystemMonitor monitor, long duration) {
-        HashMap<String, IOStats> iostatsByDevice = new HashMap<String, IOStats>();
-        for(IOStats iostat : monitor.getIOStats()) {
+        HashMap<String, OSXIOStats> iostatsByDevice = new HashMap<String, OSXIOStats>();
+        for(OSXIOStats iostat : monitor.getIOStats()) {
         	jdbcDao.insertIOStats(iostat, trialId);
             iostatsByDevice.put(iostat.getDevice(), iostat);
         }

@@ -5,15 +5,13 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.tiro.controller.IOController;
 import syndeticlogic.tiro.controller.IOExecutor;
-import syndeticlogic.tiro.controller.IORecord;
 import syndeticlogic.tiro.monitor.SystemMonitor;
 import syndeticlogic.tiro.persistence.Controller;
+import syndeticlogic.tiro.persistence.IORecord;
 import syndeticlogic.tiro.persistence.Trial;
 
 public class TrialRunner {
     private static final Log log = LogFactory.getLog(TrialRunner.class);
-    //
-    public static volatile in
     private final Trial trial;
     private final Controller[] controllers;
     private final SystemMonitor monitor;
@@ -36,7 +34,6 @@ public class TrialRunner {
         for(int i = 0; i < ioControllers.length; i++) {
             runThreads[i] = startThread(ioControllers[i]);
         }
-
     }
     
     public Thread startThread(final IOController controller) {

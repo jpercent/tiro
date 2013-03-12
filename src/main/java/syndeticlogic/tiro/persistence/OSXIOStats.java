@@ -3,13 +3,13 @@ package syndeticlogic.tiro.persistence;
 import java.util.LinkedList;
 import java.util.List;
 
-public class IOStats {
+public class OSXIOStats {
     private final String device;
     private final LinkedList<Double> kbt;
     private final LinkedList<Double> tps;
     private final LinkedList<Double> mbs;
     
-    public IOStats(String device) {
+    public OSXIOStats(String device) {
         this.device = device;
         kbt = new LinkedList<Double>();
         tps = new LinkedList<Double>();
@@ -74,7 +74,7 @@ public class IOStats {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        IOStats other = (IOStats) obj;
+        OSXIOStats other = (OSXIOStats) obj;
         if (kbt == null) {
             if (other.kbt != null)
                 return false;

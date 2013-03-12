@@ -10,12 +10,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.tiro.persistence.CpuStats;
-import syndeticlogic.tiro.persistence.IOStats;
+import syndeticlogic.tiro.persistence.OSXIOStats;
 
 public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
     private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
     private String[] devices;
-    private IOStats[] iostats;
+    private OSXIOStats[] iostats;
     private CpuStats cpustats;
 
 	public OSXIOMonitor(String... devices) {
@@ -26,9 +26,9 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 		command[devices.length+1] = "5";
 		System.arraycopy(devices, 0, command, 1, devices.length);
 		setCommandAndArgs(command);
-		iostats = new IOStats[devices.length];
+		iostats = new OSXIOStats[devices.length];
 		for(int i = 0; i < devices.length; i++) {
-		    iostats[i] = new IOStats(devices[i]);
+		    iostats[i] = new OSXIOStats(devices[i]);
 		}
 		cpustats = new CpuStats();
 	}
@@ -47,7 +47,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			String[] values = line.split("\\s+");
 			assert values.length == 3*devices.length+6;
 			int i = 0;
-			for(IOStats iostat : iostats) {
+			for(OSXIOStats iostat : iostats) {
 			    Double kbt = Double.parseDouble(values[i++]);
 			    Double tps = Double.parseDouble(values[i++]);
 			    Double mbs = Double.parseDouble(values[i++]);
@@ -61,13 +61,13 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 	}
     @Override
     public void dumpData() {
-        for(IOStats iostat : iostats) {
+        for(OSXIOStats iostat : iostats) {
             iostat.dumpData();
         } 
         cpustats.dumpData();
     }
     @Override
-    public IOStats[] getIOStats() {
+    public OSXIOStats[] getIOStats() {
         return iostats;
     }
     @Override

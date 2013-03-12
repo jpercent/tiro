@@ -169,7 +169,7 @@ public class JdbcDao {
         jdbcTemplate.update(insertTrial, trial.getId() , trial.getMeta().getId());
     }
     
-    public void completeTrial(AggregatedIOStats ioStats, MemoryStats memoryStats, CpuStats cpuStats, long duration, long trialId) {
+    public void completeTrial(AggregatedIOStats ioStats, OSXMemoryStats memoryStats, CpuStats cpuStats, long duration, long trialId) {
         jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
                 cpuStats.getAverageSystemModeTime(), cpuStats.getAverageSystemModeTime(), memoryStats.getAverageFreePages(), 
                 memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
@@ -232,7 +232,7 @@ public class JdbcDao {
         });
     }
     
-    public void insertIOStats(IOStats io, final long trialId) {
+    public void insertIOStats(OSXIOStats io, final long trialId) {
         final List<Double> kilobytesPerTransfer = io.getRawKiloBytesPerTranferMeasurements();
         final List<Double> transfersPerSecond = io.getRawTransfersPerSecond();
         final List<Double> megabytesPerSecond = io.getRawMegabytesPerSecond();
@@ -258,7 +258,7 @@ public class JdbcDao {
         });
     }
 
-    public void insertMemoryStats(MemoryStats monitor, final long trialId) {
+    public void insertMemoryStats(OSXMemoryStats monitor, final long trialId) {
         final List<Long> freePages = monitor.getRawFreePageMeasurements();
         final List<Long> activePages = monitor.getRawActivePageMeasurements();
         final List<Long> inactivePages = monitor.getRawInactivePagesMeasurements();

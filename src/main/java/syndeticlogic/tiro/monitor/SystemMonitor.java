@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import syndeticlogic.tiro.persistence.CpuStats;
-import syndeticlogic.tiro.persistence.IOStats;
-import syndeticlogic.tiro.persistence.MemoryStats;
+import syndeticlogic.tiro.persistence.OSXIOStats;
+import syndeticlogic.tiro.persistence.OSXMemoryStats;
 
 public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOMonitor {
 	private MemoryMonitor memoryMonitor;
@@ -58,7 +58,7 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
         throw new RuntimeException("unsupported");
     }
     @Override
-    public IOStats[] getIOStats() {
+    public OSXIOStats[] getIOStats() {
         return ioMonitor.getIOStats();
     }
     @Override
@@ -66,7 +66,7 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
         return ioMonitor.getDevices();
     }
     @Override
-    public MemoryStats getMemoryStats() {
+    public OSXMemoryStats getMemoryStats() {
         return memoryMonitor.getMemoryStats();
     }
     @Override

@@ -6,16 +6,16 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.tiro.persistence.MemoryStats;
+import syndeticlogic.tiro.persistence.OSXMemoryStats;
 
 public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
 	private static final Log log = LogFactory.getLog(OSXMemoryMonitor.class);
-	private final MemoryStats memoryStats;
+	private final OSXMemoryStats memoryStats;
 
 	public OSXMemoryMonitor() {
 		super();
 		setCommandAndArgs("vm_stat", "5");
-		memoryStats = new MemoryStats();
+		memoryStats = new OSXMemoryStats();
 	}
 	@Override
 	protected void processMonitorOutput(BufferedReader reader) throws IOException {
@@ -49,7 +49,7 @@ public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
         }
 	}
 	@Override
-	public MemoryStats getMemoryStats() {
+	public OSXMemoryStats getMemoryStats() {
 	    return memoryStats;
 	}
 	@Override

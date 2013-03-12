@@ -1,10 +1,10 @@
 package syndeticlogic.tiro.monitor;
 
 import syndeticlogic.tiro.persistence.CpuStats;
-import syndeticlogic.tiro.persistence.IOStats;
+import syndeticlogic.tiro.persistence.OSXIOStats;
 
 public interface IOMonitor extends Monitor {
-    IOStats[] getIOStats();
+    OSXIOStats[] getIOStats();
     String[] getDevices();
     CpuStats getCpuStats();
 }
