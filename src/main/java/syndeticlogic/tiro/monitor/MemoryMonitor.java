@@ -1,7 +1,7 @@
 package syndeticlogic.tiro.monitor;
 
-import syndeticlogic.tiro.persistence.OSXMemoryStats;
+import syndeticlogic.tiro.persistence.MemoryStats;
 
 public interface MemoryMonitor extends Monitor {
-    OSXMemoryStats getMemoryStats();
+    MemoryStats getMemoryStats();
 }

@@ -2,7 +2,7 @@ package syndeticlogic.tiro.persistence;
 
 import java.util.LinkedList;
 
-public class OSXMemoryStats {
+public class OSXMemoryStats implements MemoryStats {
     private LinkedList<Long> freePages;
     private LinkedList<Long> activePages;
     private LinkedList<Long> speculative;

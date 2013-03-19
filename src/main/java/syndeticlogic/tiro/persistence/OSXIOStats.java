@@ -3,7 +3,7 @@ package syndeticlogic.tiro.persistence;
 import java.util.LinkedList;
 import java.util.List;
 
-public class OSXIOStats {
+public class OSXIOStats implements IOStats {
     private final String device;
     private final LinkedList<Double> kbt;
     private final LinkedList<Double> tps;

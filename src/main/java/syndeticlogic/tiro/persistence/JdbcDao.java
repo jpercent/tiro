@@ -27,6 +27,7 @@ public class JdbcDao {
     private final String createIOStats;
     private final String createMemoryStats;
     private final String createCpuStats;
+    private final String createAggregateStats;
     
     private final String insertTrialMeta;
     private final String insertControllerMeta;
@@ -36,6 +37,7 @@ public class JdbcDao {
     private final String insertIOStats;
     private final String insertMemoryStats;
     private final String insertCpuStats;
+    private final String insertAggregateStats;
     
     private final String selectTrialsMetaLast;
     private final String selectControllersMetaLast;
@@ -45,6 +47,7 @@ public class JdbcDao {
     private final String selectIOStatsLast;
     private final String selectMemoryStatsLast;
     private final String selectCpuStatsLast;
+    private final String selectAggregateStatsLast;
     
     private final String completeTrial;
     private final String completeController;
@@ -55,6 +58,7 @@ public class JdbcDao {
     private long ioStatsId;
     private long memoryStatsId;
     private long cpuStatsId;
+    private long aggregateStatsId;
     // derby driverclassname == org.apache.derby.jdbc.EmbeddedDriver
     // derby jdbcUrl == jdbc:derby://localhost:21529/tmp/catena/trial_results;create=true
     // postgres driverClassName == org.postgresql.Driver
@@ -74,8 +78,10 @@ public class JdbcDao {
         this.createIOStats = config.getProperty("create-io-stats");
         this.createMemoryStats = config.getProperty("create-memory-stats");
         this.createCpuStats = config.getProperty("create-cpu-stats");
+        this.createAggregateStats = config.getProperty("create-aggregate-stats");
         assert createTrialsMeta != null && createTrials != null && createControllersMeta !=null && createControllers != null 
-                && createIORecords != null && createIOStats != null && createMemoryStats != null && createCpuStats != null;
+                && createIORecords != null && createIOStats != null && createMemoryStats != null && createCpuStats != null
+                && createAggregateStats != null;
         
         this.insertTrialMeta = config.getProperty("insert-trial-meta"); 
         this.insertControllerMeta = config.getProperty("insert-controller-meta"); 
@@ -85,8 +91,10 @@ public class JdbcDao {
         this.insertIOStats = config.getProperty("insert-io-stats");
         this.insertMemoryStats = config.getProperty("insert-memory-stats");
         this.insertCpuStats = config.getProperty("insert-cpu-stats");
+        this.insertAggregateStats = config.getProperty("insert-aggregate-stats");
         assert insertTrialMeta != null && insertControllerMeta != null && insertTrial != null && insertController != null
-                && insertIORecord != null && insertMemoryStats != null && insertIOStats != null && insertCpuStats != null;
+                && insertIORecord != null && insertMemoryStats != null && insertIOStats != null && insertCpuStats != null
+                && insertAggregateStats != null;
         
         this.selectTrialsMetaLast = config.getProperty("select-trials-meta-last-id");
         this.selectControllersMetaLast = config.getProperty("select-controllers-meta-last-id");
@@ -96,6 +104,7 @@ public class JdbcDao {
         this.selectIOStatsLast = config.getProperty("select-io-stats-last-id");
         this.selectMemoryStatsLast = config.getProperty("select-memory-stats-last-id");
         this.selectCpuStatsLast = config.getProperty("select-cpu-stats-last-id");
+        this.selectAggregateStatsLast = config.getProperty("select-aggregate-stats-last-id");
         assert selectTrialsMetaLast != null && selectControllersMetaLast != null && selectTrialsLast != null 
                 && selectControllersLast != null && selectIORecordsLast != null && selectIOStatsLast != null 
                         && selectMemoryStatsLast != null && selectCpuStatsLast != null;
@@ -115,6 +124,7 @@ public class JdbcDao {
         ioStatsId = 0;
         memoryStatsId = 0;
         cpuStatsId = 0;
+        aggregateStatsId = 0;
     }
     
     private long getId(String query) {
@@ -169,7 +179,7 @@ public class JdbcDao {
         jdbcTemplate.update(insertTrial, trial.getId() , trial.getMeta().getId());
     }
     
-    public void completeTrial(AggregatedIOStats ioStats, OSXMemoryStats memoryStats, CpuStats cpuStats, long duration, long trialId) {
+    public void completeTrial(OSXAggregatedIOStats ioStats, OSXMemoryStats memoryStats, CpuStats cpuStats, long duration, long trialId) {
         jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
                 cpuStats.getAverageSystemModeTime(), cpuStats.getAverageSystemModeTime(), memoryStats.getAverageFreePages(), 
                 memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 

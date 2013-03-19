@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.tiro.persistence.CpuStats;
+import syndeticlogic.tiro.persistence.IOStats;
 import syndeticlogic.tiro.persistence.OSXIOStats;
 
 public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
@@ -67,7 +68,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
         cpustats.dumpData();
     }
     @Override
-    public OSXIOStats[] getIOStats() {
+    public IOStats[] getIOStats() {
         return iostats;
     }
     @Override
