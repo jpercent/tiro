@@ -6,8 +6,6 @@ import java.io.IOException;
 import syndeticlogic.tiro.persistence.CpuStats;
 import syndeticlogic.tiro.persistence.IOStats;
 import syndeticlogic.tiro.persistence.MemoryStats;
-import syndeticlogic.tiro.persistence.OSXIOStats;
-import syndeticlogic.tiro.persistence.OSXMemoryStats;
 
 public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOMonitor {
 	private MemoryMonitor memoryMonitor;
