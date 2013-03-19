@@ -27,7 +27,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import syndeticlogic.tiro.controller.IOControllerFactory;
 import syndeticlogic.tiro.monitor.AbstractMonitor;
-import syndeticlogic.tiro.monitor.Monitor.Platform;
+import syndeticlogic.tiro.monitor.AbstractMonitor.Platform;
 import syndeticlogic.tiro.persistence.Controller;
 import syndeticlogic.tiro.persistence.ControllerMeta;
 import syndeticlogic.tiro.persistence.JdbcDao;
