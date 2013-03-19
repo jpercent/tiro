@@ -5,63 +5,63 @@ import java.util.List;
 
 public class LinuxIOStats implements IOStats {
     private final String device;
-    private final LinkedList<Double> kbt;
     private final LinkedList<Double> tps;
-    private final LinkedList<Double> mbs;
+    private final LinkedList<Double> kpsRead;
+    private final LinkedList<Double> kpsWritten;
     
     public LinuxIOStats(String device) {
         this.device = device;
-        kbt = new LinkedList<Double>();
+        kpsRead = new LinkedList<Double>();
         tps = new LinkedList<Double>();
-        mbs = new LinkedList<Double>();
+        kpsWritten = new LinkedList<Double>();
     }    
     
     public String getDevice() {
         return device;
     }
     
-    public double getAverageKilobytesPerTransfer() {
-        return Stats.computeAverage(kbt);
-    }
-    
-    public List<Double> getRawKiloBytesPerTranferMeasurements() {
-        return kbt;
-    }
-    
-    public double getAverageTransfersPerSecond() {
+    public double getAverageTps() {
         return  Stats.computeAverage(tps);
     }
     
-    public List<Double> getRawTransfersPerSecond()  {
+    public List<Double> getRawTps()  {
         return tps;
     }
     
-    public double getAverageMegabytesPerSecond() {
-        return  Stats.computeAverage(mbs);
+    public double getAverageKpsRead() {
+        return Stats.computeAverage(kpsRead);
     }
     
-    public List<Double> getRawMegabytesPerSecond()  {
-        return mbs;
+    public List<Double> getRawKpsRead() {
+        return kpsRead;
+    }
+
+    public double getAverageKpsWritten() {
+        return  Stats.computeAverage(kpsWritten);
     }
     
-    public void addRawRecord(Double kbtValue, Double tpsValue, Double mbsValue) {
-        kbt.add(kbtValue);
-        tps.add(tpsValue);
-        mbs.add(mbsValue);
+    public List<Double> getRawKpsWritten()  {
+        return kpsWritten;
+    }
+    
+    public void addRawRecord(Double tpsValue, Double kpsReadValue, Double kpsWrittenValue) {
+        kpsRead.add(tpsValue);
+        tps.add(kpsReadValue);
+        kpsWritten.add(kpsWrittenValue);
     }    
 
     public void dumpData() {
-        System.out.println("Kilobytes per Transfer["+device+"]: "+kbt);
         System.out.println("Transfers per Second["+device+"]: "+tps);
-        System.out.println("Megabytes per Transfer["+device+"]: "+mbs);
+    	System.out.println("Kilobytes per Transfer["+device+"]: "+kpsRead);
+        System.out.println("Megabytes per Transfer["+device+"]: "+kpsWritten);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((kbt == null) ? 0 : kbt.hashCode());
-        result = prime * result + ((mbs == null) ? 0 : mbs.hashCode());
+        result = prime * result + ((kpsRead == null) ? 0 : kpsRead.hashCode());
+        result = prime * result + ((kpsWritten == null) ? 0 : kpsWritten.hashCode());
         result = prime * result + ((tps == null) ? 0 : tps.hashCode());
         return result;
     }
@@ -75,15 +75,15 @@ public class LinuxIOStats implements IOStats {
         if (getClass() != obj.getClass())
             return false;
         LinuxIOStats other = (LinuxIOStats) obj;
-        if (kbt == null) {
-            if (other.kbt != null)
+        if (kpsRead == null) {
+            if (other.kpsRead != null)
                 return false;
-        } else if (!kbt.equals(other.kbt))
+        } else if (!kpsRead.equals(other.kpsRead))
             return false;
-        if (mbs == null) {
-            if (other.mbs != null)
+        if (kpsWritten == null) {
+            if (other.kpsWritten != null)
                 return false;
-        } else if (!mbs.equals(other.mbs))
+        } else if (!kpsWritten.equals(other.kpsWritten))
             return false;
         if (tps == null) {
             if (other.tps != null)

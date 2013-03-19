@@ -11,13 +11,14 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.tiro.persistence.CpuStats;
 import syndeticlogic.tiro.persistence.IOStats;
+import syndeticlogic.tiro.persistence.OSXCpuStats;
 import syndeticlogic.tiro.persistence.OSXIOStats;
 
 public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
     private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
     private String[] devices;
     private OSXIOStats[] iostats;
-    private CpuStats cpustats;
+    private OSXCpuStats cpustats;
 
 	public OSXIOMonitor(String... devices) {
 		super();
@@ -31,7 +32,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 		for(int i = 0; i < devices.length; i++) {
 		    iostats[i] = new OSXIOStats(devices[i]);
 		}
-		cpustats = new CpuStats();
+		cpustats = new OSXCpuStats();
 	}
     @Override
 	protected void processMonitorOutput(BufferedReader reader) throws IOException {

@@ -8,12 +8,24 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import syndeticlogic.tiro.monitor.Monitor;
+import syndeticlogic.tiro.monitor.AbstractMonitor;
 import syndeticlogic.tiro.monitor.SystemMonitor;
 import syndeticlogic.tiro.persistence.AggregatedIOStats;
+import syndeticlogic.tiro.persistence.CpuStats;
+import syndeticlogic.tiro.persistence.IOStats;
+import syndeticlogic.tiro.persistence.LinuxAggregatedIOStats;
+import syndeticlogic.tiro.persistence.LinuxCpuStats;
+import syndeticlogic.tiro.persistence.LinuxIOStats;
+import syndeticlogic.tiro.persistence.LinuxMemoryStats;
+import syndeticlogic.tiro.persistence.MemoryStats;
+import syndeticlogic.tiro.persistence.OSXAggregatedIOStats;
 import syndeticlogic.tiro.persistence.Controller;
 import syndeticlogic.tiro.persistence.IORecord;
+import syndeticlogic.tiro.persistence.OSXCpuStats;
 import syndeticlogic.tiro.persistence.OSXIOStats;
 import syndeticlogic.tiro.persistence.JdbcDao;
+import syndeticlogic.tiro.persistence.OSXMemoryStats;
 import syndeticlogic.tiro.persistence.Trial;
 
 public class TrialResultCollector {
@@ -127,20 +139,46 @@ public class TrialResultCollector {
     }
 
     public void completeTrial(Long trialId, SystemMonitor monitor, long duration) {
-        HashMap<String, OSXIOStats> iostatsByDevice = new HashMap<String, OSXIOStats>();
-        for(OSXIOStats iostat : monitor.getIOStats()) {
+        if(AbstractMonitor.getPlatform() == AbstractMonitor.Platform.Linux) {
+        	completeTrial(trialId, (LinuxMemoryStats)monitor.getMemoryStats(), (LinuxIOStats[])monitor.getIOStats(), (LinuxCpuStats)monitor.getCpuStats(), duration);
+        } else if(AbstractMonitor.getPlatform() == AbstractMonitor.Platform.Windows) {
+        	completeTrial(trialId, (OSXMemoryStats)monitor.getMemoryStats(), (OSXIOStats[])monitor.getIOStats(), (OSXCpuStats)monitor.getCpuStats(), duration);
+        } else {
+        	throw new RuntimeException("Unsupported platform");
+        }
+    }
+    
+    private void completeTrial(Long trialId, LinuxMemoryStats memoryStats, LinuxIOStats[] ioStats, LinuxCpuStats cpuStats, long duration) {
+        HashMap<String, LinuxIOStats> iostatsByDevice = new HashMap<String, LinuxIOStats>();
+        for(LinuxIOStats iostat : ioStats) {
         	jdbcDao.insertIOStats(iostat, trialId);
             iostatsByDevice.put(iostat.getDevice(), iostat);
         }
-        jdbcDao.insertMemoryStats(monitor.getMemoryStats(), trialId);
-        jdbcDao.insertCpuStats(monitor.getCpuStats(), trialId);
-        AggregatedIOStats aggregatedIOStats = new AggregatedIOStats(iostatsByDevice);
-        jdbcDao.completeTrial(aggregatedIOStats, monitor.getMemoryStats(), monitor.getCpuStats(), duration, trialId);
+        jdbcDao.insertMemoryStats(memoryStats, trialId);
+        jdbcDao.insertCpuStats(cpuStats, trialId);
+        LinuxAggregatedIOStats aggregatedIOStats = new LinuxAggregatedIOStats(iostatsByDevice);
+        jdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
         done = true;
         condition.signalAll();
-    }
+		
+	}
     
-    public class ControllerResultDescriptor {
+    private void completeTrial(Long trialId, OSXMemoryStats memoryStats, OSXIOStats[] ioStats, OSXCpuStats cpuStats, long duration) {
+        HashMap<String, OSXIOStats> iostatsByDevice = new HashMap<String, OSXIOStats>();
+        for(OSXIOStats iostat : ioStats) {
+        	jdbcDao.insertIOStats(iostat, trialId);
+            iostatsByDevice.put(iostat.getDevice(), iostat);
+        }
+        jdbcDao.insertMemoryStats(memoryStats, trialId);
+        jdbcDao.insertCpuStats(cpuStats, trialId);
+        OSXAggregatedIOStats aggregatedIOStats = new OSXAggregatedIOStats(iostatsByDevice);
+        jdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
+        done = true;
+        condition.signalAll();
+		
+	}
+    
+	public class ControllerResultDescriptor {
         List<IORecord> ios;
         long duration;
         public ControllerResultDescriptor() {

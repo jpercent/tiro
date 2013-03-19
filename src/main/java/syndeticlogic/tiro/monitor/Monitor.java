@@ -3,7 +3,6 @@ package syndeticlogic.tiro.monitor;
 import java.util.List;
 
 public interface Monitor {
-    public enum Platform { Linux, OSX, Windows };
 	void start();
 	void finish();
 	void dumpData();

@@ -179,7 +179,7 @@ public class JdbcDao {
         jdbcTemplate.update(insertTrial, trial.getId() , trial.getMeta().getId());
     }
     
-    public void completeTrial(OSXAggregatedIOStats ioStats, OSXMemoryStats memoryStats, CpuStats cpuStats, long duration, long trialId) {
+    public void completeTrial(OSXAggregatedIOStats ioStats, OSXMemoryStats memoryStats, OSXCpuStats cpuStats, long duration, long trialId) {
         jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
                 cpuStats.getAverageSystemModeTime(), cpuStats.getAverageSystemModeTime(), memoryStats.getAverageFreePages(), 
                 memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
@@ -307,7 +307,7 @@ public class JdbcDao {
         });
     }
 
-    public void insertCpuStats(CpuStats cpu, final long trialId) {
+    public void insertCpuStats(OSXCpuStats cpu, final long trialId) {
         final List<Long> userMode = cpu.getRawUserModeTime();
         final List<Long> systemMode = cpu.getRawSystemModeTime();
         final List<Long> idleMode = cpu.getRawIdleModeTime();
@@ -339,4 +339,16 @@ public class JdbcDao {
     public List<?> adHocQuery(String sql, RowMapper<?> rowMapper) {
         return jdbcTemplate.query(sql, rowMapper);
     }
+
+	public void insertIOStats(IOStats iostat, Long trialId) {
+	}
+
+	public void insertMemoryStats(LinuxMemoryStats memoryStats, Long trialId) {
+	}
+
+	public void insertCpuStats(LinuxCpuStats cpuStats, Long trialId) {
+	}
+
+	public void completeTrial(LinuxAggregatedIOStats aggregatedIOStats, LinuxMemoryStats memoryStats, LinuxCpuStats cpuStats, long duration, Long trialId) {
+	}
 }

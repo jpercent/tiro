@@ -11,29 +11,31 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.tiro.persistence.CpuStats;
 import syndeticlogic.tiro.persistence.IOStats;
+import syndeticlogic.tiro.persistence.LinuxCpuStats;
 import syndeticlogic.tiro.persistence.LinuxIOStats;
 
 public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
     private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
     private String[] devices;
     private LinuxIOStats[] iostats;
-    private CpuStats cpustats;
+    private LinuxCpuStats cpustats;
 
 	public LinuxIOMonitor(String... devices) {
 		super();
 		this.devices = devices;
 		String[] command = new String[devices.length+3];
 		command[0] = "iostat";
-		command[1] = "-d";
-		command[devices.length+1] = "5";
+		command[1] = "-dc";
+		command[devices.length+2] = "5";
 		System.arraycopy(devices, 0, command, 2, devices.length);
 		setCommandAndArgs(command);
 		iostats = new LinuxIOStats[devices.length];
 		for(int i = 0; i < devices.length; i++) {
 		    iostats[i] = new LinuxIOStats(devices[i]);
 		}
-		cpustats = new CpuStats();
+		cpustats = new LinuxCpuStats();
 	}
+	
     @Override
 	protected void processMonitorOutput(BufferedReader reader) throws IOException {
 		reader.readLine();
@@ -44,23 +46,46 @@ public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
 			if(line == null) {
 				break;
 			}
+			reader.readLine();
 			log.info(line);
 			line = line.trim();
 			String[] values = line.split("\\s+");
-			assert values.length == 3*devices.length+6;
-			int i = 0;
-			for(LinuxIOStats iostat : iostats) {
-			    Double kbt = Double.parseDouble(values[i++]);
-			    Double tps = Double.parseDouble(values[i++]);
-			    Double mbs = Double.parseDouble(values[i++]);
-			    iostat.addRawRecord(kbt, tps, mbs);
+			System.out.println("CPU Values = ");
+			for(String value : values) {
+				System.out.println("cpu values = "+value);
 			}
-			Long user = Long.parseLong(values[i++]);
-			Long system = Long.parseLong(values[i++]);
-			Long idle = Long.parseLong(values[i++]);
-			cpustats.addRawRecord(user, system, idle);
+			int i = 0;
+			Double user = Double.parseDouble(values[i++]);
+			i++; // skip %nice
+			Double system = Double.parseDouble(values[i++]);
+			Double iowait = Double.parseDouble(values[i++]);
+			i++; // skip %steal
+			Double idle = Double.parseDouble(values[i++]);
+			log.warn("droping the iowait value on the floor");
+			cpustats.addRawRecord(user, system, iowait, idle);			
+			line = reader.readLine();
+			if(line == null) {
+				break;
+			}
+			reader.readLine();
+			log.info(line);
+			line = line.trim();
+			values = line.split("\\s+");
+			System.out.println("IO devices Values = ");
+			for(String value : values) {
+				System.out.println("device values = "+value);
+			}
+			assert values.length == 3*devices.length+6;
+			i = 1; // skip the first value...
+			for(LinuxIOStats iostat : iostats) {
+			    Double tps = Double.parseDouble(values[i++]);
+			    Double kbsRead = Double.parseDouble(values[i++]);
+			    Double kbsWritten = Double.parseDouble(values[i++]);
+			    iostat.addRawRecord(tps, kbsRead, kbsWritten);
+			}
 		}
 	}
+    
     @Override
     public void dumpData() {
         for(LinuxIOStats iostat : iostats) {
@@ -68,14 +93,17 @@ public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
         } 
         cpustats.dumpData();
     }
+    
     @Override
     public IOStats[] getIOStats() {
         return iostats;
     }
+    
     @Override
     public String[] getDevices() {
         return devices;
     }
+    
     @Override
     public CpuStats getCpuStats() {
         return cpustats;
@@ -112,7 +140,7 @@ public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
 	public static void main(String[] args) throws Throwable {
 		try {
 			long starttime = System.currentTimeMillis();
-			OSXIOMonitor iom = new OSXIOMonitor("disk0");//, "disk1");
+			LinuxIOMonitor iom = new LinuxIOMonitor("/dev/sda");//, "disk1");
 			System.out.println("Starting..");
 			iom.start();
 			Thread.sleep(1000);
@@ -135,5 +163,3 @@ public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
 		}
 	}
 }
-
-

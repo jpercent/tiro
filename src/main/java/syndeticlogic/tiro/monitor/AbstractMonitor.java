@@ -12,7 +12,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public abstract class AbstractMonitor implements Monitor {
-	private Log log = LogFactory.getLog(AbstractMonitor.class);	
+	private static final Log log = LogFactory.getLog(AbstractMonitor.class);
+    public enum Platform { Linux, OSX, Windows };
+	private static Platform platform;
 	private List<String> commandAndArgs;
 	private Process process;
 	private long start;
@@ -20,6 +22,7 @@ public abstract class AbstractMonitor implements Monitor {
 	
 	public void start() {
 		recordStart();
+		System.out.println("COmamnd and args = "+commandAndArgs);
 		ProcessBuilder processBuilder = new ProcessBuilder(commandAndArgs);
 		try {
 			process = processBuilder.start();
@@ -85,7 +88,6 @@ public abstract class AbstractMonitor implements Monitor {
     
     abstract protected void processMonitorOutput(BufferedReader reader) throws IOException;
     
-    private static Platform platform;
     public static Platform getPlatform() {
         return platform;
     }
