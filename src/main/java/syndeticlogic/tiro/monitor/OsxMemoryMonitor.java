@@ -6,16 +6,16 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.tiro.persistence.stats.OSXMemoryStats;
+import syndeticlogic.tiro.persistence.stats.OsxMemoryStats;
 
-public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
-	private static final Log log = LogFactory.getLog(OSXMemoryMonitor.class);
-	private final OSXMemoryStats memoryStats;
+public class OsxMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
+	private static final Log log = LogFactory.getLog(OsxMemoryMonitor.class);
+	private final OsxMemoryStats memoryStats;
 
-	public OSXMemoryMonitor() {
+	public OsxMemoryMonitor() {
 		super();
 		setCommandAndArgs("vm_stat", "5");
-		memoryStats = new OSXMemoryStats();
+		memoryStats = new OsxMemoryStats();
 	}
 	@Override
 	protected void processMonitorOutput(BufferedReader reader) throws IOException {
@@ -49,7 +49,7 @@ public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
         }
 	}
 	@Override
-	public OSXMemoryStats getMemoryStats() {
+	public OsxMemoryStats getMemoryStats() {
 	    return memoryStats;
 	}
 	@Override
@@ -67,7 +67,7 @@ public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
 	public static void main(String[] args) throws Throwable {
 		try {
 			long starttime = System.currentTimeMillis();
-			OSXMemoryMonitor mm = new OSXMemoryMonitor();
+			OsxMemoryMonitor mm = new OsxMemoryMonitor();
 			System.out.println("Starting..");
 			mm.start();
 			Thread.sleep(1000);

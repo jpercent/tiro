@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class OSXAggregatedIOStats implements AggregatedIOStats {
-    private final Map<String, OSXIOStats> stats;
+public class OsxAggregatedIOStats implements AggregatedIOStats {
+    private final Map<String, OsxIOStats> stats;
     private final List<Double> averageTps;
     private final List<Double> averageMbs;
     
-    public OSXAggregatedIOStats(Map<String, OSXIOStats> stats) {
+    public OsxAggregatedIOStats(Map<String, OsxIOStats> stats) {
         this.stats = stats;
         averageTps = new ArrayList<Double>(stats.keySet().size());
         averageMbs = new ArrayList<Double>(stats.keySet().size());

@@ -6,10 +6,10 @@ import java.util.Properties;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
-import syndeticlogic.tiro.persistence.stats.OSXAggregatedIOStats;
-import syndeticlogic.tiro.persistence.stats.OSXCpuStats;
-import syndeticlogic.tiro.persistence.stats.OSXIOStats;
-import syndeticlogic.tiro.persistence.stats.OSXMemoryStats;
+import syndeticlogic.tiro.persistence.stats.OsxAggregatedIOStats;
+import syndeticlogic.tiro.persistence.stats.OsxCpuStats;
+import syndeticlogic.tiro.persistence.stats.OsxIOStats;
+import syndeticlogic.tiro.persistence.stats.OsxMemoryStats;
 
 import java.sql.PreparedStatement;
 
@@ -19,7 +19,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
     	super(config);
     }
    
-    public void insertMemoryStats(OSXMemoryStats monitor, final long trialId) {
+    public void insertMemoryStats(OsxMemoryStats monitor, final long trialId) {
         final List<Long> freePages = monitor.getRawFreePageMeasurements();
         final List<Long> activePages = monitor.getRawActivePageMeasurements();
         final List<Long> inactivePages = monitor.getRawInactivePagesMeasurements();
@@ -58,7 +58,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
         });
     }
 
-    public void insertIOStats(OSXIOStats io, final long trialId) {
+    public void insertIOStats(OsxIOStats io, final long trialId) {
         final List<Double> kilobytesPerTransfer = io.getRawKiloBytesPerTranferMeasurements();
         final List<Double> transfersPerSecond = io.getRawTransfersPerSecond();
         final List<Double> megabytesPerSecond = io.getRawMegabytesPerSecond();
@@ -84,7 +84,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
         });
     }
     
-    public void insertCpuStats(OSXCpuStats cpu, final long trialId) {
+    public void insertCpuStats(OsxCpuStats cpu, final long trialId) {
         final List<Long> userMode = cpu.getRawUserModeTime();
         final List<Long> systemMode = cpu.getRawSystemModeTime();
         final List<Long> idleMode = cpu.getRawIdleModeTime();
@@ -109,7 +109,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
         });
     }
     
-    public void completeTrial(OSXAggregatedIOStats ioStats, OSXMemoryStats memoryStats, OSXCpuStats cpuStats, long duration, long trialId) {
+    public void completeTrial(OsxAggregatedIOStats ioStats, OsxMemoryStats memoryStats, OsxCpuStats cpuStats, long duration, long trialId) {
         jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
                 cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIdleModeTime(), memoryStats.getAverageFreePages(), 
                 memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 

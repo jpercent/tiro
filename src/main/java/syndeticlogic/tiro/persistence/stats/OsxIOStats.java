@@ -3,13 +3,13 @@ package syndeticlogic.tiro.persistence.stats;
 import java.util.LinkedList;
 import java.util.List;
 
-public class OSXIOStats implements IOStats {
+public class OsxIOStats implements IOStats {
     private final String device;
     private final LinkedList<Double> kbt;
     private final LinkedList<Double> tps;
     private final LinkedList<Double> mbs;
     
-    public OSXIOStats(String device) {
+    public OsxIOStats(String device) {
         this.device = device;
         kbt = new LinkedList<Double>();
         tps = new LinkedList<Double>();
@@ -74,7 +74,7 @@ public class OSXIOStats implements IOStats {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        OSXIOStats other = (OSXIOStats) obj;
+        OsxIOStats other = (OsxIOStats) obj;
         if (kbt == null) {
             if (other.kbt != null)
                 return false;

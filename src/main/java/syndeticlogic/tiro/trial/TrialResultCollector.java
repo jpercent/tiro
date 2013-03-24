@@ -18,10 +18,10 @@ import syndeticlogic.tiro.persistence.stats.LinuxAggregatedIOStats;
 import syndeticlogic.tiro.persistence.stats.LinuxCpuStats;
 import syndeticlogic.tiro.persistence.stats.LinuxIOStats;
 import syndeticlogic.tiro.persistence.stats.LinuxMemoryStats;
-import syndeticlogic.tiro.persistence.stats.OSXAggregatedIOStats;
-import syndeticlogic.tiro.persistence.stats.OSXCpuStats;
-import syndeticlogic.tiro.persistence.stats.OSXIOStats;
-import syndeticlogic.tiro.persistence.stats.OSXMemoryStats;
+import syndeticlogic.tiro.persistence.stats.OsxAggregatedIOStats;
+import syndeticlogic.tiro.persistence.stats.OsxCpuStats;
+import syndeticlogic.tiro.persistence.stats.OsxIOStats;
+import syndeticlogic.tiro.persistence.stats.OsxMemoryStats;
 
 public class TrialResultCollector {
     private final BaseJdbcDao baseJdbcDao;
@@ -137,7 +137,7 @@ public class TrialResultCollector {
         if(AbstractMonitor.getPlatform() == AbstractMonitor.Platform.Linux) {
         	completeTrial(trialId, (LinuxMemoryStats)monitor.getMemoryStats(), (LinuxIOStats[])monitor.getIOStats(), (LinuxCpuStats)monitor.getCpuStats(), duration);
         } else if(AbstractMonitor.getPlatform() == AbstractMonitor.Platform.Windows) {
-        	completeTrial(trialId, (OSXMemoryStats)monitor.getMemoryStats(), (OSXIOStats[])monitor.getIOStats(), (OSXCpuStats)monitor.getCpuStats(), duration);
+        	completeTrial(trialId, (OsxMemoryStats)monitor.getMemoryStats(), (OsxIOStats[])monitor.getIOStats(), (OsxCpuStats)monitor.getCpuStats(), duration);
         } else {
         	throw new RuntimeException("Unsupported platform");
         }
@@ -158,15 +158,15 @@ public class TrialResultCollector {
 		
 	}
     
-    private void completeTrial(Long trialId, OSXMemoryStats memoryStats, OSXIOStats[] ioStats, OSXCpuStats cpuStats, long duration) {
-        HashMap<String, OSXIOStats> iostatsByDevice = new HashMap<String, OSXIOStats>();
-        for(OSXIOStats iostat : ioStats) {
+    private void completeTrial(Long trialId, OsxMemoryStats memoryStats, OsxIOStats[] ioStats, OsxCpuStats cpuStats, long duration) {
+        HashMap<String, OsxIOStats> iostatsByDevice = new HashMap<String, OsxIOStats>();
+        for(OsxIOStats iostat : ioStats) {
         	baseJdbcDao.insertIOStats(iostat, trialId);
             iostatsByDevice.put(iostat.getDevice(), iostat);
         }
         baseJdbcDao.insertMemoryStats(memoryStats, trialId);
         baseJdbcDao.insertCpuStats(cpuStats, trialId);
-        OSXAggregatedIOStats aggregatedIOStats = new OSXAggregatedIOStats(iostatsByDevice);
+        OsxAggregatedIOStats aggregatedIOStats = new OsxAggregatedIOStats(iostatsByDevice);
         baseJdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
         done = true;
         condition.signalAll();

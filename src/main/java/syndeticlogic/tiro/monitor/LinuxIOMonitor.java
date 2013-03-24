@@ -15,7 +15,7 @@ import syndeticlogic.tiro.persistence.stats.LinuxCpuStats;
 import syndeticlogic.tiro.persistence.stats.LinuxIOStats;
 
 public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
-    private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
+    private static final Log log = LogFactory.getLog(OsxIOMonitor.class);
     private String[] devices;
     private LinuxIOStats[] iostats;
     private LinuxCpuStats cpustats;

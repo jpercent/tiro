@@ -11,16 +11,16 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.tiro.persistence.stats.CpuStats;
 import syndeticlogic.tiro.persistence.stats.IOStats;
-import syndeticlogic.tiro.persistence.stats.OSXCpuStats;
-import syndeticlogic.tiro.persistence.stats.OSXIOStats;
+import syndeticlogic.tiro.persistence.stats.OsxCpuStats;
+import syndeticlogic.tiro.persistence.stats.OsxIOStats;
 
-public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
-    private static final Log log = LogFactory.getLog(OSXIOMonitor.class);
+public class OsxIOMonitor extends AbstractMonitor implements IOMonitor {
+    private static final Log log = LogFactory.getLog(OsxIOMonitor.class);
     private String[] devices;
-    private OSXIOStats[] iostats;
-    private OSXCpuStats cpustats;
+    private OsxIOStats[] iostats;
+    private OsxCpuStats cpustats;
 
-	public OSXIOMonitor(String... devices) {
+	public OsxIOMonitor(String... devices) {
 		super();
 		this.devices = devices;
 		String[] command = new String[devices.length+2];
@@ -28,11 +28,11 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 		command[devices.length+1] = "5";
 		System.arraycopy(devices, 0, command, 1, devices.length);
 		setCommandAndArgs(command);
-		iostats = new OSXIOStats[devices.length];
+		iostats = new OsxIOStats[devices.length];
 		for(int i = 0; i < devices.length; i++) {
-		    iostats[i] = new OSXIOStats(devices[i]);
+		    iostats[i] = new OsxIOStats(devices[i]);
 		}
-		cpustats = new OSXCpuStats();
+		cpustats = new OsxCpuStats();
 	}
     @Override
 	protected void processMonitorOutput(BufferedReader reader) throws IOException {
@@ -49,7 +49,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			String[] values = line.split("\\s+");
 			assert values.length == 3*devices.length+6;
 			int i = 0;
-			for(OSXIOStats iostat : iostats) {
+			for(OsxIOStats iostat : iostats) {
 			    Double kbt = Double.parseDouble(values[i++]);
 			    Double tps = Double.parseDouble(values[i++]);
 			    Double mbs = Double.parseDouble(values[i++]);
@@ -63,7 +63,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 	}
     @Override
     public void dumpData() {
-        for(OSXIOStats iostat : iostats) {
+        for(OsxIOStats iostat : iostats) {
             iostat.dumpData();
         } 
         cpustats.dumpData();
@@ -112,7 +112,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 	public static void main(String[] args) throws Throwable {
 		try {
 			long starttime = System.currentTimeMillis();
-			OSXIOMonitor iom = new OSXIOMonitor("disk0");//, "disk1");
+			OsxIOMonitor iom = new OsxIOMonitor("disk0");//, "disk1");
 			System.out.println("Starting..");
 			iom.start();
 			Thread.sleep(1000);

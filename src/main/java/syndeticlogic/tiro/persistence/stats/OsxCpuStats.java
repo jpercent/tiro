@@ -6,12 +6,12 @@ import syndeticlogic.tiro.persistence.stats.CpuStats;
 
 import java.util.List;
 
-public class OSXCpuStats implements CpuStats {
+public class OsxCpuStats implements CpuStats {
     private LinkedList<Long> user;
     private LinkedList<Long> system;
     private LinkedList<Long> idle;
     
-    public OSXCpuStats() {
+    public OsxCpuStats() {
         user = new LinkedList<Long>();
         system = new LinkedList<Long>();
         idle = new LinkedList<Long>();
@@ -69,7 +69,7 @@ public class OSXCpuStats implements CpuStats {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        OSXCpuStats other = (OSXCpuStats) obj;
+        OsxCpuStats other = (OsxCpuStats) obj;
         if (idle == null) {
             if (other.idle != null)
                 return false;

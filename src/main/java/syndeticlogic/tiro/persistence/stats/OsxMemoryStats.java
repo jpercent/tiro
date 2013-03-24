@@ -2,7 +2,7 @@ package syndeticlogic.tiro.persistence.stats;
 
 import java.util.LinkedList;
 
-public class OSXMemoryStats implements MemoryStats {
+public class OsxMemoryStats implements MemoryStats {
     private LinkedList<Long> freePages;
     private LinkedList<Long> activePages;
     private LinkedList<Long> speculative;
@@ -15,7 +15,7 @@ public class OSXMemoryStats implements MemoryStats {
     private LinkedList<Long> pageIns;
     private LinkedList<Long> pageOuts;
 
-    public OSXMemoryStats() {
+    public OsxMemoryStats() {
         freePages = new LinkedList<Long>();
         activePages = new LinkedList<Long>();
         speculative = new LinkedList<Long>();
@@ -173,7 +173,7 @@ public class OSXMemoryStats implements MemoryStats {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        OSXMemoryStats other = (OSXMemoryStats) obj;
+        OsxMemoryStats other = (OsxMemoryStats) obj;
         if (activePages == null) {
             if (other.activePages != null)
                 return false;

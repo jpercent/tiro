@@ -17,7 +17,7 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
 	    final SystemMonitor monitor;
 	    switch(AbstractMonitor.getPlatform()) {
 	    case OSX:
-	        monitor = new SystemMonitor(new OSXMemoryMonitor(), new OSXIOMonitor(devices));
+	        monitor = new SystemMonitor(new OsxMemoryMonitor(), new OsxIOMonitor(devices));
 	        break;
 	    case Linux:
 	    case Windows:
