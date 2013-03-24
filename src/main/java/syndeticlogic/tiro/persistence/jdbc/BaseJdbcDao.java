@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.persistence;
+package syndeticlogic.tiro.persistence.jdbc;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -11,60 +11,74 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import syndeticlogic.tiro.persistence.Controller;
+import syndeticlogic.tiro.persistence.ControllerMeta;
+import syndeticlogic.tiro.persistence.IORecord;
+import syndeticlogic.tiro.persistence.Trial;
+import syndeticlogic.tiro.persistence.TrialMeta;
+import syndeticlogic.tiro.persistence.stats.LinuxAggregatedIOStats;
+import syndeticlogic.tiro.persistence.stats.LinuxCpuStats;
+import syndeticlogic.tiro.persistence.stats.LinuxIOStats;
+import syndeticlogic.tiro.persistence.stats.LinuxMemoryStats;
+import syndeticlogic.tiro.persistence.stats.OSXAggregatedIOStats;
+import syndeticlogic.tiro.persistence.stats.OSXCpuStats;
+import syndeticlogic.tiro.persistence.stats.OSXIOStats;
+import syndeticlogic.tiro.persistence.stats.OSXMemoryStats;
+
 import java.sql.PreparedStatement;
 
-public class JdbcDao {
-    private final JdbcTemplate jdbcTemplate;
-    private final String driverClassName;
-    private final String jdbcUrl;
+public class BaseJdbcDao {
+    protected final JdbcTemplate jdbcTemplate;
+    protected final String driverClassName;
+    protected final String jdbcUrl;
     
-    private final String createTrialsMeta;
-    private final String createControllersMeta;
-    private final String createTrials;
-    private final String createControllers;
-    private final String createIORecords;
-    private final String createIOStats;
-    private final String createMemoryStats;
-    private final String createCpuStats;
-    private final String createAggregateStats;
+    protected final String createTrialsMeta;
+    protected final String createControllersMeta;
+    protected final String createTrials;
+    protected final String createControllers;
+    protected final String createIORecords;
+    protected final String createIOStats;
+    protected final String createMemoryStats;
+    protected final String createCpuStats;
+    protected final String createAggregateStats;
     
-    private final String insertTrialMeta;
-    private final String insertControllerMeta;
-    private final String insertTrial;
-    private final String insertController;
-    private final String insertIORecord;
-    private final String insertIOStats;
-    private final String insertMemoryStats;
-    private final String insertCpuStats;
-    private final String insertAggregateStats;
+    protected final String insertTrialMeta;
+    protected final String insertControllerMeta;
+    protected final String insertTrial;
+    protected final String insertController;
+    protected final String insertIORecord;
+    protected final String insertIOStats;
+    protected final String insertMemoryStats;
+    protected final String insertCpuStats;
+    protected final String insertAggregateStats;
     
-    private final String selectTrialsMetaLast;
-    private final String selectControllersMetaLast;
-    private final String selectTrialsLast;
-    private final String selectControllersLast;
-    private final String selectIORecordsLast;
-    private final String selectIOStatsLast;
-    private final String selectMemoryStatsLast;
-    private final String selectCpuStatsLast;
-    private final String selectAggregateStatsLast;
+    protected final String selectTrialsMetaLast;
+    protected final String selectControllersMetaLast;
+    protected final String selectTrialsLast;
+    protected final String selectControllersLast;
+    protected final String selectIORecordsLast;
+    protected final String selectIOStatsLast;
+    protected final String selectMemoryStatsLast;
+    protected final String selectCpuStatsLast;
+    protected final String selectAggregateStatsLast;
     
-    private final String completeTrial;
-    private final String completeController;
+    protected final String completeTrial;
+    protected final String completeController;
     
-    private long trialsId;
-    private long controllersId;
-    private long ioRecordsId;
-    private long ioStatsId;
-    private long memoryStatsId;
-    private long cpuStatsId;
-    private long aggregateStatsId;
+    protected long trialsId;
+    protected long controllersId;
+    protected long ioRecordsId;
+    protected long ioStatsId;
+    protected long memoryStatsId;
+    protected long cpuStatsId;
+    protected long aggregateStatsId;
     // derby driverclassname == org.apache.derby.jdbc.EmbeddedDriver
     // derby jdbcUrl == jdbc:derby://localhost:21529/tmp/catena/trial_results;create=true
     // postgres driverClassName == org.postgresql.Driver
     // postres jdbcUrl == jdbc:postgresql://localhost:5432/catena?user=james&password=password
     // sqlite driverClassName == org.sqlite.JDBC
     // sqlite jdburl == jdbc:sqlite:trial-result.db;foreign keys=true?user=james&password=password
-    public JdbcDao(Properties config) {
+    public BaseJdbcDao(Properties config) {
         this.driverClassName = config.getProperty("driver-class-name");
         this.jdbcUrl = config.getProperty("jdbc-url");
         assert driverClassName != null && jdbcUrl != null;
@@ -79,8 +93,8 @@ public class JdbcDao {
         this.createCpuStats = config.getProperty("create-cpu-stats");
         this.createAggregateStats = config.getProperty("create-aggregate-stats");
         assert createTrialsMeta != null && createTrials != null && createControllersMeta !=null && createControllers != null 
-                && createIORecords != null && createIOStats != null && createMemoryStats != null && createCpuStats != null
-                && createAggregateStats != null;
+               && createIORecords != null && createIOStats != null && createMemoryStats != null && createCpuStats != null
+               && createAggregateStats != null;
         
         this.insertTrialMeta = config.getProperty("insert-trial-meta"); 
         this.insertControllerMeta = config.getProperty("insert-controller-meta"); 
@@ -92,8 +106,8 @@ public class JdbcDao {
         this.insertCpuStats = config.getProperty("insert-cpu-stats");
         this.insertAggregateStats = config.getProperty("insert-aggregate-stats");
         assert insertTrialMeta != null && insertControllerMeta != null && insertTrial != null && insertController != null
-                && insertIORecord != null && insertMemoryStats != null && insertIOStats != null && insertCpuStats != null
-                && insertAggregateStats != null;
+               && insertIORecord != null && insertMemoryStats != null && insertIOStats != null && insertCpuStats != null
+               && insertAggregateStats != null;
         
         this.selectTrialsMetaLast = config.getProperty("select-trials-meta-last-id");
         this.selectControllersMetaLast = config.getProperty("select-controllers-meta-last-id");
@@ -105,8 +119,8 @@ public class JdbcDao {
         this.selectCpuStatsLast = config.getProperty("select-cpu-stats-last-id");
         this.selectAggregateStatsLast = config.getProperty("select-aggregate-stats-last-id");
         assert selectTrialsMetaLast != null && selectControllersMetaLast != null && selectTrialsLast != null 
-                && selectControllersLast != null && selectIORecordsLast != null && selectIOStatsLast != null 
-                        && selectMemoryStatsLast != null && selectCpuStatsLast != null;
+               && selectControllersLast != null && selectIORecordsLast != null && selectIOStatsLast != null 
+               && selectMemoryStatsLast != null && selectCpuStatsLast != null && selectAggregateStatsLast != null;
         
         this.completeTrial = config.getProperty("complete-trial");
         this.completeController = config.getProperty("complete-controller");
@@ -126,7 +140,7 @@ public class JdbcDao {
         aggregateStatsId = 0;
     }
     
-    private long getId(String query) {
+    protected long getId(String query) {
         long id = -1;
         try {
             id = jdbcTemplate.queryForObject(query, Long.class);
@@ -145,6 +159,7 @@ public class JdbcDao {
             ioStatsId = getId(selectIOStatsLast);
             memoryStatsId = getId(selectMemoryStatsLast);
             cpuStatsId = getId(selectCpuStatsLast);
+            aggregateStatsId = getId(selectAggregateStatsLast);
         }
     }
     
@@ -157,6 +172,7 @@ public class JdbcDao {
         jdbcTemplate.execute(createIOStats);
         jdbcTemplate.execute(createMemoryStats);
         jdbcTemplate.execute(createCpuStats);
+        jdbcTemplate.execute(createAggregateStats);
     }
     
     public void insertTrialMeta(TrialMeta trialMeta) {
@@ -178,23 +194,6 @@ public class JdbcDao {
         jdbcTemplate.update(insertTrial, trial.getId() , trial.getMeta().getId());
     }
     
-    public void completeTrial(OSXAggregatedIOStats ioStats, OSXMemoryStats memoryStats, OSXCpuStats cpuStats, long duration, long trialId) {
-        jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
-                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIdleModeTime(), memoryStats.getAverageFreePages(), 
-                memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
-                memoryStats.getAverageNumberOfFaultRoutineCalls(), memoryStats.getAverageCopyOnWriteFaults(), memoryStats.getAverageZeroFilledPages(),
-                memoryStats.getAveragePageIns(), memoryStats.getAveragePageOuts(), trialId);
-    }
-
-	public void completeTrial(LinuxAggregatedIOStats aggregatedIOStats, LinuxMemoryStats memoryStats, LinuxCpuStats cpuStats, long duration, Long trialId) {
-        jdbcTemplate.update(completeTrial, duration, aggregatedIOStats.getAverageKpsRead(), cpuStats.getAverageUserModeTime(), 
-                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIowaitTime(), cpuStats.getAverageIdleModeTime(),                 
-                memoryStats.getFree(), memoryStats.getBuffers(), memoryStats.getCached(), memoryStats.getSwapCached(), memoryStats.getActive(), memoryStats.getActiveAnon(),
-            	memoryStats.getActiveFile(), memoryStats.getInactive(), memoryStats.getInactiveAnon(), memoryStats.getInactiveFile(), memoryStats.getUnevictable(),
-            	memoryStats.getSwapTotal(), memoryStats.getSwapFree(), memoryStats.getDirty(), memoryStats.getWriteback(), memoryStats.getAnon(), memoryStats.getSlab(),
-            	memoryStats.getSreclaim(), memoryStats.getSunreclaim(), memoryStats.getKernelStack(), memoryStats.getBounce(), memoryStats.getVmallocTotal(), 
-            	memoryStats.getVmallocUsed(), memoryStats.getVmallocChunk(), trialId);
-	}  
     public void insertController(Controller controller) { 
         synchronized(this) {
             controller.setId(controllersId++);
@@ -462,6 +461,24 @@ public class JdbcDao {
 						return idleMode.size();
 					}
 				});
+	}
+
+    public void completeTrial(OSXAggregatedIOStats ioStats, OSXMemoryStats memoryStats, OSXCpuStats cpuStats, long duration, long trialId) {
+        jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
+                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIdleModeTime(), memoryStats.getAverageFreePages(), 
+                memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
+                memoryStats.getAverageNumberOfFaultRoutineCalls(), memoryStats.getAverageCopyOnWriteFaults(), memoryStats.getAverageZeroFilledPages(),
+                memoryStats.getAveragePageIns(), memoryStats.getAveragePageOuts(), trialId);
+    }
+
+	public void completeTrial(LinuxAggregatedIOStats aggregatedIOStats, LinuxMemoryStats memoryStats, LinuxCpuStats cpuStats, long duration, Long trialId) {
+        jdbcTemplate.update(completeTrial, duration, aggregatedIOStats.getAverageKpsRead(), cpuStats.getAverageUserModeTime(), 
+                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIowaitTime(), cpuStats.getAverageIdleModeTime(),                 
+                memoryStats.getFree(), memoryStats.getBuffers(), memoryStats.getCached(), memoryStats.getSwapCached(), memoryStats.getActive(), memoryStats.getActiveAnon(),
+            	memoryStats.getActiveFile(), memoryStats.getInactive(), memoryStats.getInactiveAnon(), memoryStats.getInactiveFile(), memoryStats.getUnevictable(),
+            	memoryStats.getSwapTotal(), memoryStats.getSwapFree(), memoryStats.getDirty(), memoryStats.getWriteback(), memoryStats.getAnon(), memoryStats.getSlab(),
+            	memoryStats.getSreclaim(), memoryStats.getSunreclaim(), memoryStats.getKernelStack(), memoryStats.getBounce(), memoryStats.getVmallocTotal(), 
+            	memoryStats.getVmallocUsed(), memoryStats.getVmallocChunk(), trialId);
 	}
 	
     public List<?> adHocQuery(String sql, RowMapper<?> rowMapper, Map<String, Object> args) {

@@ -12,11 +12,11 @@ import org.junit.Test;
 
 import syndeticlogic.tiro.Tiro;
 import syndeticlogic.tiro.persistence.ControllerMeta;
-import syndeticlogic.tiro.persistence.JdbcDao;
 import syndeticlogic.tiro.persistence.TrialMeta;
+import syndeticlogic.tiro.persistence.jdbc.BaseJdbcDao;
 
 public class TrialResultsJdbcDaoTest {
-    JdbcDao jdbcDao;
+    BaseJdbcDao baseJdbcDao;
     
     @Before
     public void setup() throws Exception {
@@ -24,9 +24,9 @@ public class TrialResultsJdbcDaoTest {
         file.delete();
         Properties props = Tiro.load("tiro-sqlite.properties");
         props.setProperty("jdbc-url", "jdbc:sqlite:tiro-test.db;foreign keys=true");
-        jdbcDao = new JdbcDao(props);
-        jdbcDao.createTables();
-        jdbcDao.initialize();
+        baseJdbcDao = new BaseJdbcDao(props);
+        baseJdbcDao.createTables();
+        baseJdbcDao.initialize();
 
     }
     @After
@@ -36,9 +36,9 @@ public class TrialResultsJdbcDaoTest {
     public void testInsertTrialMeta() {
         TrialMeta meta = new TrialMeta("test-trial-meta");
         assertEquals(-1, meta.getId());
-        jdbcDao.insertTrialMeta(meta);
+        baseJdbcDao.insertTrialMeta(meta);
         assertEquals(1, meta.getId());
-        List<?> trialsMeta = jdbcDao.adHocQuery("select * from trials_meta", new TrialMeta.TrialMetaRowMapper());
+        List<?> trialsMeta = baseJdbcDao.adHocQuery("select * from trials_meta", new TrialMeta.TrialMetaRowMapper());
         System.out.println("TrialMetas = "+trialsMeta);
         assertEquals(1, trialsMeta.size());
         assertTrue(meta != trialsMeta.get(0));
@@ -48,9 +48,9 @@ public class TrialResultsJdbcDaoTest {
     public void testInsertControllerMeta() {
         ControllerMeta meta = new ControllerMeta("sequentialscan", "syncfilechannel", "java", "device");
         assertEquals(-1, meta.getId());
-        jdbcDao.insertControllerMeta(meta);
+        baseJdbcDao.insertControllerMeta(meta);
         assertEquals(1, meta.getId());
-        List<?> controllersMeta = jdbcDao.adHocQuery("select * from controllers_meta", new ControllerMeta.ControllerMetaRowMapper());
+        List<?> controllersMeta = baseJdbcDao.adHocQuery("select * from controllers_meta", new ControllerMeta.ControllerMetaRowMapper());
         System.out.println("ControllersMeta = "+controllersMeta);
         assertEquals(1, controllersMeta.size());
         assertTrue(meta != controllersMeta.get(0));

@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.persistence;
+package syndeticlogic.tiro.persistence.stats;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -1,7 +1,9 @@
-package syndeticlogic.tiro.persistence;
+package syndeticlogic.tiro.persistence.stats;
 
 import java.util.LinkedList;
-import syndeticlogic.tiro.persistence.CpuStats;
+
+import syndeticlogic.tiro.persistence.stats.CpuStats;
+
 import java.util.List;
 
 public class OSXCpuStats implements CpuStats {

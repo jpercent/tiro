@@ -9,10 +9,10 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.tiro.persistence.CpuStats;
-import syndeticlogic.tiro.persistence.IOStats;
-import syndeticlogic.tiro.persistence.OSXCpuStats;
-import syndeticlogic.tiro.persistence.OSXIOStats;
+import syndeticlogic.tiro.persistence.stats.CpuStats;
+import syndeticlogic.tiro.persistence.stats.IOStats;
+import syndeticlogic.tiro.persistence.stats.OSXCpuStats;
+import syndeticlogic.tiro.persistence.stats.OSXIOStats;
 
 public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
     private static final Log log = LogFactory.getLog(OSXIOMonitor.class);

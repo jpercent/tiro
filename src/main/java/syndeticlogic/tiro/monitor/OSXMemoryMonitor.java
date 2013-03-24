@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.tiro.persistence.OSXMemoryStats;
+import syndeticlogic.tiro.persistence.stats.OSXMemoryStats;
 
 public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
 	private static final Log log = LogFactory.getLog(OSXMemoryMonitor.class);

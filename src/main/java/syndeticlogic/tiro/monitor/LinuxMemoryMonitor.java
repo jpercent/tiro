@@ -6,8 +6,8 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.tiro.persistence.LinuxMemoryStats;
-import syndeticlogic.tiro.persistence.MemoryStats;
+import syndeticlogic.tiro.persistence.stats.LinuxMemoryStats;
+import syndeticlogic.tiro.persistence.stats.MemoryStats;
 
 public class LinuxMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
 	private static final Log log = LogFactory.getLog(LinuxMemoryMonitor.class);

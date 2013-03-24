@@ -6,16 +6,16 @@ import syndeticlogic.tiro.controller.IOControllerFactory;
 import syndeticlogic.tiro.controller.IOController;
 import syndeticlogic.tiro.monitor.SystemMonitor;
 import syndeticlogic.tiro.persistence.Controller;
-import syndeticlogic.tiro.persistence.JdbcDao;
 import syndeticlogic.tiro.persistence.Trial;
+import syndeticlogic.tiro.persistence.jdbc.BaseJdbcDao;
 
 public class TrialRunnerFactory {
     private final IOControllerFactory builder;
-    private final JdbcDao jdbcDao;
+    private final BaseJdbcDao baseJdbcDao;
     
-    public TrialRunnerFactory(IOControllerFactory builder, JdbcDao jdbcDao) {
+    public TrialRunnerFactory(IOControllerFactory builder, BaseJdbcDao baseJdbcDao) {
         this.builder = builder;
-        this.jdbcDao = jdbcDao;
+        this.baseJdbcDao = baseJdbcDao;
     }
     
     public TrialRunner createTrialRunner(Trial trial, Controller[] controllerModels) {
@@ -26,7 +26,7 @@ public class TrialRunnerFactory {
             controllers[i++] = builder.createIOController(cmodel);
             
         SystemMonitor monitor = SystemMonitor.createSystemMonitor(devices.toArray(new String[devices.size()]));
-        TrialResultCollector results = new TrialResultCollector(jdbcDao);
+        TrialResultCollector results = new TrialResultCollector(baseJdbcDao);
         return new TrialRunner(trial, controllerModels, monitor, controllers, results);
     }
 }

@@ -30,9 +30,9 @@ import syndeticlogic.tiro.monitor.AbstractMonitor;
 import syndeticlogic.tiro.monitor.AbstractMonitor.Platform;
 import syndeticlogic.tiro.persistence.Controller;
 import syndeticlogic.tiro.persistence.ControllerMeta;
-import syndeticlogic.tiro.persistence.JdbcDao;
 import syndeticlogic.tiro.persistence.Trial;
 import syndeticlogic.tiro.persistence.TrialMeta;
+import syndeticlogic.tiro.persistence.jdbc.BaseJdbcDao;
 import syndeticlogic.tiro.trial.TrialRunner;
 import syndeticlogic.tiro.trial.TrialRunnerFactory;
 
@@ -40,7 +40,7 @@ public class Tiro {
 
     public static TrialRunner createSequentialScanTrial() throws Exception {
         // Properties p = .load("catena-perf-sql.properties");
-        // JdbcDao results = new JdbcDao(p);
+        // BaseJdbcDao results = new BaseJdbcDao(p);
         // results.insertTrialMeta();
         // results.insertTrial();
         // results.insertController();
@@ -61,7 +61,7 @@ public class Tiro {
     private String[] args;
     private static final Log log = LogFactory.getLog(Tiro.class);
     private Map<String, Object> config;
-    private final JdbcDao jdbcDao;
+    private final BaseJdbcDao baseJdbcDao;
     private int retries;
     private boolean concurrent;
     private boolean init;
@@ -102,7 +102,7 @@ public class Tiro {
         options.addOption(properties);
         options.addOption(retries);
         parser = new GnuParser();
-        jdbcDao = new JdbcDao(Tiro.load("tiro-sqlite.properties"));
+        baseJdbcDao = new BaseJdbcDao(Tiro.load("tiro-sqlite.properties"));
 
     }
 
@@ -174,10 +174,10 @@ public class Tiro {
 
     public List<TrialRunner> buildTrials() {
         if (init) {
-            jdbcDao.createTables();
+            baseJdbcDao.createTables();
         }
         LinkedList<TrialRunner> trialRunners = new LinkedList<TrialRunner>();
-        jdbcDao.initialize();
+        baseJdbcDao.initialize();
         System.out.println(config);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> trialMetaJsons = (List<Map<String, Object>>) config.get("trials");
@@ -185,19 +185,19 @@ public class Tiro {
             @SuppressWarnings("unchecked")
             List<Map<String, String>> controllerMetaJsons = (List<Map<String, String>>) trialMetaJson.get("controllers");
             TrialMeta trialMeta = new TrialMeta((String) trialMetaJson.get("name"));
-            jdbcDao.insertTrialMeta(trialMeta);
+            baseJdbcDao.insertTrialMeta(trialMeta);
             Trial trial = new Trial(trialMeta);
-            //jdbcDao.insertTrial(trial);
+            //baseJdbcDao.insertTrial(trial);
 
             Controller[] controllers = new Controller[controllerMetaJsons.size()];
             int i = 0;
             for (Map<String, String> controller : controllerMetaJsons) {
                 ControllerMeta cmeta = new ControllerMeta(controller.get("controller"), controller.get("executor"), controller.get("memory"), controller.get("device"));
-                jdbcDao.insertControllerMeta(cmeta);
+                baseJdbcDao.insertControllerMeta(cmeta);
                 controllers[i++] = new Controller(trialMeta, cmeta);
             }
-            //jdbcDao.insertControllers(controllers);
-            TrialRunnerFactory trialRunnerFactory = new TrialRunnerFactory(new IOControllerFactory(), jdbcDao);
+            //baseJdbcDao.insertControllers(controllers);
+            TrialRunnerFactory trialRunnerFactory = new TrialRunnerFactory(new IOControllerFactory(), baseJdbcDao);
             trialRunners.add(trialRunnerFactory.createTrialRunner(trial, controllers));
             System.out.println("Trial = " + trialMetaJson);
         }

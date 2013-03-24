@@ -10,21 +10,21 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import syndeticlogic.tiro.monitor.AbstractMonitor;
 import syndeticlogic.tiro.monitor.SystemMonitor;
-import syndeticlogic.tiro.persistence.LinuxAggregatedIOStats;
-import syndeticlogic.tiro.persistence.LinuxCpuStats;
-import syndeticlogic.tiro.persistence.LinuxIOStats;
-import syndeticlogic.tiro.persistence.LinuxMemoryStats;
-import syndeticlogic.tiro.persistence.OSXAggregatedIOStats;
 import syndeticlogic.tiro.persistence.Controller;
 import syndeticlogic.tiro.persistence.IORecord;
-import syndeticlogic.tiro.persistence.OSXCpuStats;
-import syndeticlogic.tiro.persistence.OSXIOStats;
-import syndeticlogic.tiro.persistence.JdbcDao;
-import syndeticlogic.tiro.persistence.OSXMemoryStats;
 import syndeticlogic.tiro.persistence.Trial;
+import syndeticlogic.tiro.persistence.jdbc.BaseJdbcDao;
+import syndeticlogic.tiro.persistence.stats.LinuxAggregatedIOStats;
+import syndeticlogic.tiro.persistence.stats.LinuxCpuStats;
+import syndeticlogic.tiro.persistence.stats.LinuxIOStats;
+import syndeticlogic.tiro.persistence.stats.LinuxMemoryStats;
+import syndeticlogic.tiro.persistence.stats.OSXAggregatedIOStats;
+import syndeticlogic.tiro.persistence.stats.OSXCpuStats;
+import syndeticlogic.tiro.persistence.stats.OSXIOStats;
+import syndeticlogic.tiro.persistence.stats.OSXMemoryStats;
 
 public class TrialResultCollector {
-    private final JdbcDao jdbcDao;
+    private final BaseJdbcDao baseJdbcDao;
     private final HashMap<Long, ControllerResultDescriptor> trials;
     private final ArrayList<IORecord> pqueue;
     private final Thread serializer;
@@ -33,8 +33,8 @@ public class TrialResultCollector {
     private final int threshold;
     private volatile boolean done;
 
-    public TrialResultCollector(JdbcDao jdbcDaoa) {    
-        this.jdbcDao = jdbcDaoa;
+    public TrialResultCollector(BaseJdbcDao jdbcDaoa) {    
+        this.baseJdbcDao = jdbcDaoa;
         trials = new HashMap<Long, ControllerResultDescriptor>();
         lock = new ReentrantLock();
         condition = lock.newCondition();
@@ -51,7 +51,7 @@ public class TrialResultCollector {
                         try {
                             condition.await();
                             if(pqueue.size() > 0) {
-                            	jdbcDao.insertIORecord(pqueue);
+                            	baseJdbcDao.insertIORecord(pqueue);
                             	pqueue.clear();
                             }
                         } catch (InterruptedException e) {
@@ -67,8 +67,8 @@ public class TrialResultCollector {
     }
     
     public void beginTrial(Trial trial, Controller[] controllers) {
-        jdbcDao.insertTrial(trial);
-        jdbcDao.insertControllers(controllers);
+        baseJdbcDao.insertTrial(trial);
+        baseJdbcDao.insertControllers(controllers);
     }
     
     public void addIORecord(IORecord ioDescriptor) {
@@ -123,7 +123,7 @@ public class TrialResultCollector {
             if (trials.containsKey(controllerId)) {
                 desc = trials.get(controllerId);
                 desc.duration = duration;
-                jdbcDao.completeController(controllerId, duration);
+                baseJdbcDao.completeController(controllerId, duration);
                 flush(desc, /* force = */ true);
             } else {
                 throw new RuntimeException("attempted to complete a trial that didn't create any records");
@@ -146,13 +146,13 @@ public class TrialResultCollector {
     private void completeTrial(Long trialId, LinuxMemoryStats memoryStats, LinuxIOStats[] ioStats, LinuxCpuStats cpuStats, long duration) {
         HashMap<String, LinuxIOStats> iostatsByDevice = new HashMap<String, LinuxIOStats>();
         for(LinuxIOStats iostat : ioStats) {
-        	jdbcDao.insertIOStats(iostat, trialId);
+        	baseJdbcDao.insertIOStats(iostat, trialId);
             iostatsByDevice.put(iostat.getDevice(), iostat);
         }
-        jdbcDao.insertMemoryStats(memoryStats, trialId);
-        jdbcDao.insertCpuStats(cpuStats, trialId);
+        baseJdbcDao.insertMemoryStats(memoryStats, trialId);
+        baseJdbcDao.insertCpuStats(cpuStats, trialId);
         LinuxAggregatedIOStats aggregatedIOStats = new LinuxAggregatedIOStats(iostatsByDevice);
-        jdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
+        baseJdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
         done = true;
         condition.signalAll();
 		
@@ -161,13 +161,13 @@ public class TrialResultCollector {
     private void completeTrial(Long trialId, OSXMemoryStats memoryStats, OSXIOStats[] ioStats, OSXCpuStats cpuStats, long duration) {
         HashMap<String, OSXIOStats> iostatsByDevice = new HashMap<String, OSXIOStats>();
         for(OSXIOStats iostat : ioStats) {
-        	jdbcDao.insertIOStats(iostat, trialId);
+        	baseJdbcDao.insertIOStats(iostat, trialId);
             iostatsByDevice.put(iostat.getDevice(), iostat);
         }
-        jdbcDao.insertMemoryStats(memoryStats, trialId);
-        jdbcDao.insertCpuStats(cpuStats, trialId);
+        baseJdbcDao.insertMemoryStats(memoryStats, trialId);
+        baseJdbcDao.insertCpuStats(cpuStats, trialId);
         OSXAggregatedIOStats aggregatedIOStats = new OSXAggregatedIOStats(iostatsByDevice);
-        jdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
+        baseJdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
         done = true;
         condition.signalAll();
 		
