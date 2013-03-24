@@ -8,17 +8,12 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import syndeticlogic.tiro.monitor.Monitor;
 import syndeticlogic.tiro.monitor.AbstractMonitor;
 import syndeticlogic.tiro.monitor.SystemMonitor;
-import syndeticlogic.tiro.persistence.AggregatedIOStats;
-import syndeticlogic.tiro.persistence.CpuStats;
-import syndeticlogic.tiro.persistence.IOStats;
 import syndeticlogic.tiro.persistence.LinuxAggregatedIOStats;
 import syndeticlogic.tiro.persistence.LinuxCpuStats;
 import syndeticlogic.tiro.persistence.LinuxIOStats;
 import syndeticlogic.tiro.persistence.LinuxMemoryStats;
-import syndeticlogic.tiro.persistence.MemoryStats;
 import syndeticlogic.tiro.persistence.OSXAggregatedIOStats;
 import syndeticlogic.tiro.persistence.Controller;
 import syndeticlogic.tiro.persistence.IORecord;
