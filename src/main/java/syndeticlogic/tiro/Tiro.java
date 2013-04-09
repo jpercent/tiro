@@ -37,23 +37,6 @@ import syndeticlogic.tiro.trial.TrialRunner;
 import syndeticlogic.tiro.trial.TrialRunnerFactory;
 
 public class Tiro {
-
-    public static TrialRunner createSequentialScanTrial() throws Exception {
-        // Properties p = .load("catena-perf-sql.properties");
-        // BaseJdbcDao results = new BaseJdbcDao(p);
-        // results.insertTrialMeta();
-        // results.insertTrial();
-        // results.insertController();
-        return null;
-    }
-
-    public static Properties load(String propsName) throws Exception {
-        URL url = ClassLoader.getSystemResource(propsName);
-        Properties props = new Properties();
-        props.load(url.openStream());
-        return props;
-    }
-
     private final Options options = new Options();
     private final CommandLineParser parser;
     private final String usage;
@@ -102,80 +85,84 @@ public class Tiro {
         options.addOption(properties);
         options.addOption(retries);
         parser = new GnuParser();
-        baseJdbcDao = new BaseJdbcDao(Tiro.load("tiro-sqlite.properties"));
+        baseJdbcDao = new BaseJdbcDao(Tiro.loadProperties());
 
     }
 
     @SuppressWarnings("unchecked")
     private boolean parse() throws Exception {
         boolean ret = false;
-        if (args != null && args.length > 0) {
-            CommandLine line = null;
-            try {
-                line = parser.parse(options, args);
-                assert line != null;
-                if (line.hasOption("help")) {
-                    HelpFormatter formatter = new HelpFormatter();
-                    formatter.printHelp(80, usage, header, options, "");
-                    return false;
-                }
-
-                if (line.hasOption("init")) {
-                    this.init = true;
-                }
-
-                if (line.hasOption("concurrent")) {
-                    this.concurrent = true;
-                }
-
-                if (line.hasOption("config")) {
-                    String jsonConfigFile = line.getOptionValue("config");
-                    ObjectMapper mapper = new ObjectMapper(new JsonFactory() {
-                        @Override
-                        public JsonParser createJsonParser(File file) throws IOException, JsonParseException {
-                            JsonParser p = super.createJsonParser(file);
-                            p.enable(JsonParser.Feature.ALLOW_COMMENTS);
-                            p.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
-                            p.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
-                            p.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
-                            return p;
-                        }
-                    });
-                    try {
-                        config = mapper.readValue(new File(jsonConfigFile), Map.class);
-                    } catch (IOException e) {
-                        log.error("Error parsing configuration file.  The configuration file is JSON; ensure that the syntax is\n\t valid: http://json.org/.  Details of the exception follow.\n", e);
-                        return false;
-                    }
-                    if (line.hasOption("retries")) {
-                        String retries = line.getOptionValue("retries");
-                        if (retries != null && !retries.equals("")) {
-                            this.retries = new Integer(retries.trim()).intValue();
-                            if (this.retries <= 0 || this.retries > 50) {
-                                throw new org.apache.commons.cli.ParseException("retries is bounded between 1 and 50 inclusive");
-                            }
-                        }
-                    }
-                    ret = true;
-                } else {
-                    log.fatal("No config file set");
-                }
-            } catch (org.apache.commons.cli.ParseException e) {
-                log.error("Exception parsing arguments", e);
-            }
-        } else {
+        if (args == null  || args.length <= 0) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printUsage(new PrintWriter(System.out), 80, usage);
             formatter = new HelpFormatter();
             formatter.printHelp(80, usage, header, options, "");
+            return ret;
         }
-        return ret;
+
+		CommandLine line = null;
+		try {
+			line = parser.parse(options, args);
+			assert line != null;
+			if (line.hasOption("help")) {
+				HelpFormatter formatter = new HelpFormatter();
+				formatter.printHelp(80, usage, header, options, "");
+				return false;
+			}
+
+			if (line.hasOption("init")) {
+				this.init = true;
+			}
+
+			if (line.hasOption("concurrent")) {
+				this.concurrent = true;
+			}
+
+			if (line.hasOption("config")) {
+				String jsonConfigFile = line.getOptionValue("config");
+				ObjectMapper mapper = new ObjectMapper(new JsonFactory() {
+					@Override
+					public JsonParser createJsonParser(File file) throws IOException, JsonParseException {
+						JsonParser p = super.createJsonParser(file);
+						p.enable(JsonParser.Feature.ALLOW_COMMENTS);
+						p.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+						p.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
+						p.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+						return p;
+					}
+				});
+				
+				try {
+					config = mapper.readValue(new File(jsonConfigFile), Map.class);
+				} catch (IOException e) {
+					log.error("Error parsing configuration file.  The configuration file is JSON; ensure that the syntax is\n\t valid: http://json.org/.  Details of the exception follow.\n", e);
+					return false;
+				}
+				if (line.hasOption("retries")) {
+					String retries = line.getOptionValue("retries");
+					if (retries != null && !retries.equals("")) {
+						this.retries = new Integer(retries.trim()).intValue();
+						if (this.retries <= 0 || this.retries > 50) {
+							throw new org.apache.commons.cli.ParseException(
+									"retries is bounded between 1 and 50 inclusive");
+						}
+					}
+				}
+				ret = true;
+			} else {
+				log.fatal("No config file set");
+			}
+		} catch (org.apache.commons.cli.ParseException e) {
+			log.error("Exception parsing arguments", e);
+		}
+		return ret;
     }
 
     public List<TrialRunner> buildTrials() {
         if (init) {
             baseJdbcDao.createTables();
         }
+        
         LinkedList<TrialRunner> trialRunners = new LinkedList<TrialRunner>();
         baseJdbcDao.initialize();
         System.out.println(config);
@@ -214,7 +201,7 @@ public class Tiro {
         else
             throw new RuntimeException("unsupported platform");
     }
-
+    
     public void cleanUpSystem() {
     }
 
@@ -243,7 +230,33 @@ public class Tiro {
             }
         } while (++count < retries);
     }
+    
+    public static TrialRunner createSequentialScanTrial() throws Exception {
+        // Properties p = .load("catena-perf-sql.properties");
+        // BaseJdbcDao results = new BaseJdbcDao(p);
+        // results.insertTrialMeta();
+        // results.insertTrial();
+        // results.insertController();
+        return null;
+    }
 
+    public static Properties loadProperties() throws Exception {
+    	final String propertiesFileName;
+        if (SystemUtils.IS_OS_MAC_OSX)
+            propertiesFileName = "tiro-sqlite-osx.properties";
+        else if (SystemUtils.IS_OS_LINUX)
+            propertiesFileName = "tiro-sqlite-linux.properties";
+        else if (SystemUtils.IS_OS_WINDOWS)
+        	throw new RuntimeException("Windows is not supported at this time");
+        else
+        	throw new RuntimeException("unsupported platform");
+        System.out.println(propertiesFileName);
+        URL url = ClassLoader.getSystemResource(propertiesFileName);
+        Properties props = new Properties();
+        props.load(url.openStream());
+        return props;
+    }
+    
     public static void main(String[] args) throws Exception {
         Tiro apprentice = new Tiro(args);
         apprentice.run();

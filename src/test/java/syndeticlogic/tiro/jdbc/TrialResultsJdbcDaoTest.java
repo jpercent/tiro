@@ -22,7 +22,7 @@ public class TrialResultsJdbcDaoTest {
     public void setup() throws Exception {
         File file = new File("tiro-test.db");
         file.delete();
-        Properties props = Tiro.load("tiro-sqlite-linux.properties");
+        Properties props = Tiro.loadProperties();
         props.setProperty("jdbc-url", "jdbc:sqlite:tiro-test.db;foreign keys=true");
         baseJdbcDao = new BaseJdbcDao(props);
         baseJdbcDao.createTables();
@@ -58,7 +58,6 @@ public class TrialResultsJdbcDaoTest {
         assertEquals(1, controllersMeta.size());
         assertTrue(meta != controllersMeta.get(0));
         assertTrue(meta.equals(controllersMeta.get(0)));
-        
     }
     
     @Test
