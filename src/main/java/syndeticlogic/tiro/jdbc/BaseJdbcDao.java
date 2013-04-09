@@ -172,7 +172,9 @@ public class BaseJdbcDao {
         jdbcTemplate.execute(createIOStats);
         jdbcTemplate.execute(createMemoryStats);
         jdbcTemplate.execute(createCpuStats);
+        System.out.println("Linux? ");
         jdbcTemplate.execute(createAggregateStats);
+        System.out.println("Linux sucks");
     }
     
     public void insertTrialMeta(TrialMeta trialMeta) {

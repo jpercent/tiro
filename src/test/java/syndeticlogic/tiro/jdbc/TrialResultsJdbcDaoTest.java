@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.persistence;
+package syndeticlogic.tiro.jdbc;
 
 import static org.junit.Assert.*;
 
@@ -22,16 +22,18 @@ public class TrialResultsJdbcDaoTest {
     public void setup() throws Exception {
         File file = new File("tiro-test.db");
         file.delete();
-        Properties props = Tiro.load("tiro-sqlite.properties");
+        Properties props = Tiro.load("tiro-sqlite-linux.properties");
         props.setProperty("jdbc-url", "jdbc:sqlite:tiro-test.db;foreign keys=true");
         baseJdbcDao = new BaseJdbcDao(props);
         baseJdbcDao.createTables();
         baseJdbcDao.initialize();
 
     }
+    
     @After
     public void teardown() {
     }
+    
     @Test
     public void testInsertTrialMeta() {
         TrialMeta meta = new TrialMeta("test-trial-meta");
@@ -44,6 +46,7 @@ public class TrialResultsJdbcDaoTest {
         assertTrue(meta != trialsMeta.get(0));
         assertTrue(meta.equals(trialsMeta.get(0)));
     }
+    
     @Test
     public void testInsertControllerMeta() {
         ControllerMeta meta = new ControllerMeta("sequentialscan", "syncfilechannel", "java", "device");
@@ -57,6 +60,7 @@ public class TrialResultsJdbcDaoTest {
         assertTrue(meta.equals(controllersMeta.get(0)));
         
     }
+    
     @Test
     public void testTrial() {
     }
