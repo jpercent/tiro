@@ -12,26 +12,17 @@ import syndeticlogic.tiro.jdbc.BaseJdbcDao;
 import syndeticlogic.tiro.model.Controller;
 import syndeticlogic.tiro.model.IORecord;
 import syndeticlogic.tiro.model.Trial;
-import syndeticlogic.tiro.monitor.AbstractMonitor;
 import syndeticlogic.tiro.monitor.SystemMonitor;
-import syndeticlogic.tiro.stat.LinuxAggregatedIOStats;
-import syndeticlogic.tiro.stat.LinuxCpuStats;
-import syndeticlogic.tiro.stat.LinuxIOStats;
-import syndeticlogic.tiro.stat.LinuxMemoryStats;
-import syndeticlogic.tiro.stat.OsxAggregatedIOStats;
-import syndeticlogic.tiro.stat.OsxCpuStats;
-import syndeticlogic.tiro.stat.OsxIOStats;
-import syndeticlogic.tiro.stat.OsxMemoryStats;
 
-public class TrialResultCollector {
+public abstract class TrialResultCollector {
     private final BaseJdbcDao baseJdbcDao;
     private final HashMap<Long, ControllerResultDescriptor> trials;
     private final ArrayList<IORecord> pqueue;
     private final Thread serializer;
     private final ReentrantLock lock;
-    private final Condition condition;
+    protected final Condition condition;
     private final int threshold;
-    private volatile boolean done;
+    protected volatile boolean done;
 
     public TrialResultCollector(BaseJdbcDao jdbcDaoa) {    
         this.baseJdbcDao = jdbcDaoa;
@@ -132,46 +123,6 @@ public class TrialResultCollector {
             lock.unlock();
         }
     }
-
-    public void completeTrial(Long trialId, SystemMonitor monitor, long duration) {
-        if(AbstractMonitor.getPlatform() == AbstractMonitor.Platform.Linux) {
-        	completeTrial(trialId, (LinuxMemoryStats)monitor.getMemoryStats(), (LinuxIOStats[])monitor.getIOStats(), (LinuxCpuStats)monitor.getCpuStats(), duration);
-        } else if(AbstractMonitor.getPlatform() == AbstractMonitor.Platform.Windows) {
-        	completeTrial(trialId, (OsxMemoryStats)monitor.getMemoryStats(), (OsxIOStats[])monitor.getIOStats(), (OsxCpuStats)monitor.getCpuStats(), duration);
-        } else {
-        	throw new RuntimeException("Unsupported platform");
-        }
-    }
-    
-    private void completeTrial(Long trialId, LinuxMemoryStats memoryStats, LinuxIOStats[] ioStats, LinuxCpuStats cpuStats, long duration) {
-        HashMap<String, LinuxIOStats> iostatsByDevice = new HashMap<String, LinuxIOStats>();
-        for(LinuxIOStats iostat : ioStats) {
-        	baseJdbcDao.insertIOStats(iostat, trialId);
-            iostatsByDevice.put(iostat.getDevice(), iostat);
-        }
-        baseJdbcDao.insertMemoryStats(memoryStats, trialId);
-        baseJdbcDao.insertCpuStats(cpuStats, trialId);
-        LinuxAggregatedIOStats aggregatedIOStats = new LinuxAggregatedIOStats(iostatsByDevice);
-        baseJdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
-        done = true;
-        condition.signalAll();
-		
-	}
-    
-    private void completeTrial(Long trialId, OsxMemoryStats memoryStats, OsxIOStats[] ioStats, OsxCpuStats cpuStats, long duration) {
-        HashMap<String, OsxIOStats> iostatsByDevice = new HashMap<String, OsxIOStats>();
-        for(OsxIOStats iostat : ioStats) {
-        	baseJdbcDao.insertIOStats(iostat, trialId);
-            iostatsByDevice.put(iostat.getDevice(), iostat);
-        }
-        baseJdbcDao.insertMemoryStats(memoryStats, trialId);
-        baseJdbcDao.insertCpuStats(cpuStats, trialId);
-        OsxAggregatedIOStats aggregatedIOStats = new OsxAggregatedIOStats(iostatsByDevice);
-        baseJdbcDao.completeTrial(aggregatedIOStats, memoryStats, cpuStats, duration, trialId);
-        done = true;
-        condition.signalAll();
-		
-	}
     
 	public class ControllerResultDescriptor {
         List<IORecord> ios;
@@ -180,4 +131,6 @@ public class TrialResultCollector {
             this.ios = new LinkedList<IORecord>();
         }
     }
+	
+	abstract void completeTrial(Long trialId, SystemMonitor monitor, long duration);
 }

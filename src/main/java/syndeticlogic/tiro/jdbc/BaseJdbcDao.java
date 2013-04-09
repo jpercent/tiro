@@ -1,9 +1,16 @@
 package syndeticlogic.tiro.jdbc;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -16,22 +23,26 @@ import syndeticlogic.tiro.model.ControllerMeta;
 import syndeticlogic.tiro.model.IORecord;
 import syndeticlogic.tiro.model.Trial;
 import syndeticlogic.tiro.model.TrialMeta;
-import syndeticlogic.tiro.stat.LinuxAggregatedIOStats;
-import syndeticlogic.tiro.stat.LinuxCpuStats;
-import syndeticlogic.tiro.stat.LinuxIOStats;
-import syndeticlogic.tiro.stat.LinuxMemoryStats;
-import syndeticlogic.tiro.stat.OsxAggregatedIOStats;
-import syndeticlogic.tiro.stat.OsxCpuStats;
-import syndeticlogic.tiro.stat.OsxIOStats;
-import syndeticlogic.tiro.stat.OsxMemoryStats;
 
 import java.sql.PreparedStatement;
 
 public class BaseJdbcDao {
+	private static final Log log = LogFactory.getLog(BaseJdbcDao.class); 
+	protected final DriverManagerDataSource source;
     protected final JdbcTemplate jdbcTemplate;
     protected final String driverClassName;
     protected final String jdbcUrl;
     
+    protected final String trialsMeta;
+    protected final String controllersMeta;
+    protected final String trials;
+    protected final String controllers;
+    protected final String ioRecords;
+    protected final String ioStats;
+    protected final String memoryStats;
+    protected final String cpuStats;
+    protected final String aggregateStats;
+
     protected final String createTrialsMeta;
     protected final String createControllersMeta;
     protected final String createTrials;
@@ -41,6 +52,16 @@ public class BaseJdbcDao {
     protected final String createMemoryStats;
     protected final String createCpuStats;
     protected final String createAggregateStats;
+    
+    protected final String dropTrialsMeta;
+    protected final String dropControllersMeta;
+    protected final String dropTrials;
+    protected final String dropControllers;
+    protected final String dropIORecords;
+    protected final String dropIOStats;
+    protected final String dropMemoryStats;
+    protected final String dropCpuStats;
+    protected final String dropAggregateStats;
     
     protected final String insertTrialMeta;
     protected final String insertControllerMeta;
@@ -83,6 +104,19 @@ public class BaseJdbcDao {
         this.jdbcUrl = config.getProperty("jdbc-url");
         assert driverClassName != null && jdbcUrl != null;
         
+        this.trialsMeta = config.getProperty("trials-meta");
+        this.controllersMeta = config.getProperty("controllers-meta");
+        this.trials = config.getProperty("trials");
+        this.controllers = config.getProperty("controllers");
+        this.ioRecords = config.getProperty("io-records");
+        this.memoryStats = config.getProperty("memory-stats");
+        this.ioStats = config.getProperty("io-stats");
+        this.cpuStats = config.getProperty("cpu-stats");
+        this.aggregateStats = config.getProperty("aggregated-stats");
+        assert this.trialsMeta != null && this.controllersMeta != null && this.trials != null && this.controllers != null
+        		&& this.ioRecords != null && this.memoryStats != null &&  this.ioStats != null && this.cpuStats != null
+        		&& this.aggregateStats != null;
+        
         this.createTrialsMeta = config.getProperty("create-trials-meta");
         this.createControllersMeta = config.getProperty("create-controllers-meta");
         this.createTrials = config.getProperty("create-trials");
@@ -95,6 +129,19 @@ public class BaseJdbcDao {
         assert createTrialsMeta != null && createTrials != null && createControllersMeta !=null && createControllers != null 
                && createIORecords != null && createIOStats != null && createMemoryStats != null && createCpuStats != null
                && createAggregateStats != null;
+
+        this.dropTrialsMeta = config.getProperty("drop-trials-meta");
+        this.dropControllersMeta = config.getProperty("drop-controllers-meta");
+        this.dropTrials = config.getProperty("drop-trials");
+        this.dropControllers = config.getProperty("drop-controllers");
+        this.dropIORecords = config.getProperty("drop-io-records");
+        this.dropMemoryStats = config.getProperty("drop-memory-stats");
+        this.dropIOStats = config.getProperty("drop-io-stats");
+        this.dropCpuStats = config.getProperty("drop-cpu-stats");
+        this.dropAggregateStats = config.getProperty("drop-aggregated-stats");
+        assert this.dropTrialsMeta != null && this.dropControllersMeta != null && this.dropTrials != null && this.dropControllers != null
+        		&& this.dropIORecords != null && this.dropMemoryStats != null &&  this.dropIOStats != null && this.dropCpuStats != null
+        		&& this.dropAggregateStats != null;
         
         this.insertTrialMeta = config.getProperty("insert-trial-meta"); 
         this.insertControllerMeta = config.getProperty("insert-controller-meta"); 
@@ -127,7 +174,7 @@ public class BaseJdbcDao {
         assert completeTrial != null && completeController != null; 
                 
         // create data source connection
-        DriverManagerDataSource source = new DriverManagerDataSource();
+        this.source = new DriverManagerDataSource();
         source.setDriverClassName(driverClassName);
         source.setUrl(jdbcUrl);
         jdbcTemplate = new JdbcTemplate(source);
@@ -153,6 +200,9 @@ public class BaseJdbcDao {
     }
     
     public void initialize() {
+    	if(needsInit()) {
+    		createTables();
+    	}
         synchronized(this) {
             controllersId = getId(selectControllersLast);
             ioRecordsId = getId(selectIORecordsLast);
@@ -172,11 +222,35 @@ public class BaseJdbcDao {
         jdbcTemplate.execute(createIOStats);
         jdbcTemplate.execute(createMemoryStats);
         jdbcTemplate.execute(createCpuStats);
-        System.out.println("Linux? ");
         jdbcTemplate.execute(createAggregateStats);
-        System.out.println("Linux sucks");
     }
     
+	public boolean needsInit() {
+		boolean ret = false;
+		try {
+			Connection connection = source.getConnection();
+			DatabaseMetaData dbm = connection.getMetaData();
+			
+			@SuppressWarnings("serial")
+			LinkedList<String> tables = new LinkedList<String>() {{
+				add(trialsMeta); add(controllersMeta); add(trials);
+				add(controllers); add(ioRecords); add(memoryStats);
+				add(ioStats); add(aggregateStats);
+			}};
+			
+			for (String table : tables) {
+				ResultSet tableMeta = dbm.getTables(null, null, table, null);
+				if (!tableMeta.next()) {
+					ret = true;
+					break;
+				}
+			}
+		} catch (SQLException e) {
+			log.fatal("Recieved SQLException configuring Tiro", e);
+			throw new RuntimeException(e);
+		}
+		return ret;
+	}
     public void insertTrialMeta(TrialMeta trialMeta) {
         System.out.println(insertTrialMeta);
         jdbcTemplate.update(insertTrialMeta, trialMeta.getName());
@@ -251,238 +325,6 @@ public class BaseJdbcDao {
         });
     }
     
-    public void insertMemoryStats(OsxMemoryStats monitor, final long trialId) {
-        final List<Long> freePages = monitor.getRawFreePageMeasurements();
-        final List<Long> activePages = monitor.getRawActivePageMeasurements();
-        final List<Long> inactivePages = monitor.getRawInactivePagesMeasurements();
-        final List<Long> wiredPages = monitor.getRawWiredPagesMeasurements();
-        final List<Long> faultRoutineCalls = monitor.getRawNumberOfFaultRoutineCallMeasurements();
-        final List<Long> copyOnWriteFaults = monitor.getRawCopyOnWriteFaultsMeasurements();
-        final List<Long> zeroFilledPages = monitor.getRawZeroFilledPageMeasurements();
-        final List<Long> reactivePages = monitor.getRawReactivatedPagesMeasurements();
-        final List<Long> pageIns = monitor.getRawPageInMeasurements();
-        final List<Long> pageOuts = monitor.getRawPageOutsMeasurements();
-        final long id;
-        synchronized(this) {
-            id = memoryStatsId;
-            memoryStatsId += freePages.size();
-        }
-        jdbcTemplate.batchUpdate(insertMemoryStats, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, id+i);
-                ps.setLong(2, trialId);
-                ps.setLong(3, freePages.get(i));
-                ps.setLong(4, activePages.get(i));
-                ps.setLong(5, inactivePages.get(i));
-                ps.setLong(6, wiredPages.get(i));
-                ps.setLong(7, faultRoutineCalls.get(i));
-                ps.setLong(8, copyOnWriteFaults.get(i));
-                ps.setLong(9, zeroFilledPages.get(i));
-                ps.setLong(10, reactivePages.get(i));
-                ps.setLong(11, pageIns.get(i));
-                ps.setLong(12, pageOuts.get(i));
-            }
-            @Override
-            public int getBatchSize() {
-                return freePages.size();
-            }
-        });
-    }
-
-    public void insertMemoryStats(final LinuxMemoryStats stats, final Long trialId) {
-    	final List<Long> free = stats.getFree();
-    	final List<Long> buffers = stats.getBuffers();
-    	final List<Long> cached = stats.getCached();
-    	final List<Long>  swapcached = stats.getSwapCached();
-    	final List<Long>  active = stats.getActive();
-    	final List<Long>  activeAnon = stats.getActiveAnon();
-    	final List<Long>  activeFile = stats.getActiveFile();
-    	final List<Long>  inactive = stats.getInactive();
-    	final List<Long>  inactiveAnon= stats.getInactiveAnon();
-    	final List<Long>  inactiveFile = stats.getInactiveFile();
-    	final List<Long>  unevictable = stats.getUnevictable();
-    	final List<Long>  swapTotal = stats.getSwapTotal();
-    	final List<Long>  swapFree = stats.getSwapFree();
-    	final List<Long>  dirty = stats.getDirty();
-    	final List<Long>  writeback = stats.getWriteback();
-    	final List<Long>  anon = stats.getAnon();
-    	final List<Long>  slab = stats.getSlab();
-    	final List<Long>  sreclaim = stats.getSreclaim();
-    	final List<Long>  sunreclaim = stats.getSunreclaim();
-    	final List<Long>  kernelStack = stats.getKernelStack();
-    	final List<Long>  bounce = stats.getBounce();
-    	final List<Long>  vmallocTotal = stats.getVmallocTotal();
-    	final List<Long>  vmallocUsed = stats.getVmallocUsed();
-    	final List<Long>  vmallocChunk = stats.getVmallocChunk();
-    	final long id;
-        synchronized(this) {
-            id = memoryStatsId;
-            memoryStatsId += free.size();
-        }
-        jdbcTemplate.batchUpdate(insertMemoryStats, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-            	int j = 1;
-                ps.setLong(j++, id+i);
-                ps.setLong(j++, trialId);
-                ps.setLong(j++, free.get(i));
-                ps.setLong(j++, buffers.get(i));
-                ps.setLong(j++, cached.get(i));
-                ps.setLong(j++, swapcached.get(i));
-                ps.setLong(j++, active.get(i));
-                ps.setLong(j++, activeAnon.get(i));
-                ps.setLong(j++, activeFile.get(i));
-                ps.setLong(j++, inactive.get(i));
-                ps.setLong(j++, inactiveAnon.get(i));
-                ps.setLong(j++, inactiveFile.get(i));
-                ps.setLong(j++, unevictable.get(i));
-                ps.setLong(j++, swapTotal.get(i));
-                ps.setLong(j++, swapFree.get(i));
-                ps.setLong(j++, dirty.get(i));
-                ps.setLong(j++, writeback.get(i));
-                ps.setLong(j++, anon.get(i));
-                ps.setLong(j++, slab.get(i));
-                ps.setLong(j++, sreclaim.get(i));
-                ps.setLong(j++, sunreclaim.get(i));
-                ps.setLong(j++, kernelStack.get(i));
-                ps.setLong(j++, bounce.get(i));
-                ps.setLong(j++, vmallocTotal.get(i));
-                ps.setLong(j++, vmallocUsed.get(i));
-                ps.setLong(j++, vmallocChunk.get(i));
-            }
-            @Override
-            public int getBatchSize() {
-                return free.size();
-            }
-        });
-	}
-
-    public void insertIOStats(OsxIOStats io, final long trialId) {
-        final List<Double> kilobytesPerTransfer = io.getRawKiloBytesPerTranferMeasurements();
-        final List<Double> transfersPerSecond = io.getRawTransfersPerSecond();
-        final List<Double> megabytesPerSecond = io.getRawMegabytesPerSecond();
-        final long id;
-        
-        synchronized(this) {
-            id = ioStatsId;
-            ioStatsId += megabytesPerSecond.size();
-        }
-        jdbcTemplate.batchUpdate(insertIOStats, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, id+i);
-                ps.setLong(2, trialId);
-                ps.setDouble(3, kilobytesPerTransfer.get(i));
-                ps.setDouble(4, transfersPerSecond.get(i));
-                ps.setDouble(5, megabytesPerSecond.get(i));
-            }
-            @Override
-            public int getBatchSize() {
-                return megabytesPerSecond.size();
-            }
-        });
-    }
-    
-	public void insertIOStats(final LinuxIOStats io, final Long trialId) {
-        final List<Double> tps = io.getRawTps();
-        final List<Double> kpsRead = io.getRawKpsRead();
-        final List<Double> kpsWritten = io.getRawKpsWritten();
-        final long id;
-        
-        synchronized(this) {
-            id = ioStatsId;
-            ioStatsId += tps.size();
-        }
-        jdbcTemplate.batchUpdate(insertIOStats, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, id+i);
-                ps.setLong(2, trialId);
-                ps.setDouble(3, tps.get(i));
-                ps.setDouble(4, kpsRead.get(i));
-                ps.setDouble(5, kpsWritten.get(i));
-            }
-            @Override
-            public int getBatchSize() {
-                return tps.size();
-            }
-        });
-	}
-
-    public void insertCpuStats(OsxCpuStats cpu, final long trialId) {
-        final List<Long> userMode = cpu.getRawUserModeTime();
-        final List<Long> systemMode = cpu.getRawSystemModeTime();
-        final List<Long> idleMode = cpu.getRawIdleModeTime();
-        final long id;
-        synchronized(this) {
-            id = cpuStatsId;
-            cpuStatsId += idleMode.size();
-        }
-        jdbcTemplate.batchUpdate(insertCpuStats, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, id+i);
-                ps.setLong(2, trialId);
-                ps.setLong(3, userMode.get(i));
-                ps.setLong(4, systemMode.get(i));
-                ps.setLong(5, idleMode.get(i));
-            }
-            @Override
-            public int getBatchSize() {
-                return idleMode.size();
-            }
-        });
-    }
-    
-	public void insertCpuStats(final LinuxCpuStats cpu, final Long trialId) {
-		final List<Double> userMode = cpu.getRawUserModeTime();
-		final List<Double> systemMode = cpu.getRawSystemModeTime();
-		final List<Double> iowait = cpu.getRawIowaitTime();
-		final List<Double> idleMode = cpu.getRawIdleModeTime();
-		final long id;
-		synchronized (this) {
-			id = cpuStatsId;
-			cpuStatsId += idleMode.size();
-		}
-		jdbcTemplate.batchUpdate(insertCpuStats,
-				new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int i)
-							throws SQLException {
-						ps.setLong(1, id + i);
-						ps.setLong(2, trialId);
-						ps.setDouble(3, userMode.get(i));
-						ps.setDouble(4, systemMode.get(i));
-						ps.setDouble(4, iowait.get(i));
-						ps.setDouble(5, idleMode.get(i));
-					}
-
-					@Override
-					public int getBatchSize() {
-						return idleMode.size();
-					}
-				});
-	}
-
-    public void completeTrial(OsxAggregatedIOStats ioStats, OsxMemoryStats memoryStats, OsxCpuStats cpuStats, long duration, long trialId) {
-        jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
-                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIdleModeTime(), memoryStats.getAverageFreePages(), 
-                memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
-                memoryStats.getAverageNumberOfFaultRoutineCalls(), memoryStats.getAverageCopyOnWriteFaults(), memoryStats.getAverageZeroFilledPages(),
-                memoryStats.getAveragePageIns(), memoryStats.getAveragePageOuts(), trialId);
-    }
-
-	public void completeTrial(LinuxAggregatedIOStats aggregatedIOStats, LinuxMemoryStats memoryStats, LinuxCpuStats cpuStats, long duration, Long trialId) {
-        jdbcTemplate.update(completeTrial, duration, aggregatedIOStats.getAverageKpsRead(), cpuStats.getAverageUserModeTime(), 
-                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIowaitTime(), cpuStats.getAverageIdleModeTime(),                 
-                memoryStats.getFree(), memoryStats.getBuffers(), memoryStats.getCached(), memoryStats.getSwapCached(), memoryStats.getActive(), memoryStats.getActiveAnon(),
-            	memoryStats.getActiveFile(), memoryStats.getInactive(), memoryStats.getInactiveAnon(), memoryStats.getInactiveFile(), memoryStats.getUnevictable(),
-            	memoryStats.getSwapTotal(), memoryStats.getSwapFree(), memoryStats.getDirty(), memoryStats.getWriteback(), memoryStats.getAnon(), memoryStats.getSlab(),
-            	memoryStats.getSreclaim(), memoryStats.getSunreclaim(), memoryStats.getKernelStack(), memoryStats.getBounce(), memoryStats.getVmallocTotal(), 
-            	memoryStats.getVmallocUsed(), memoryStats.getVmallocChunk(), trialId);
-	}
-	
     public List<?> adHocQuery(String sql, RowMapper<?> rowMapper, Map<String, Object> args) {
         return jdbcTemplate.query(sql, rowMapper, args);
     }
