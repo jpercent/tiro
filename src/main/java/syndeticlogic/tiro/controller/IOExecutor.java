@@ -1,6 +1,6 @@
 package syndeticlogic.tiro.controller;
 
-import syndeticlogic.tiro.persistence.IORecord;
+import syndeticlogic.tiro.model.IORecord;
 
 public interface IOExecutor {
     public enum ExecutorType { Sync, Async };

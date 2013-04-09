@@ -11,9 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import syndeticlogic.tiro.Tiro;
-import syndeticlogic.tiro.persistence.ControllerMeta;
-import syndeticlogic.tiro.persistence.TrialMeta;
-import syndeticlogic.tiro.persistence.jdbc.BaseJdbcDao;
+import syndeticlogic.tiro.jdbc.BaseJdbcDao;
+import syndeticlogic.tiro.model.ControllerMeta;
+import syndeticlogic.tiro.model.TrialMeta;
 
 public class TrialResultsJdbcDaoTest {
     BaseJdbcDao baseJdbcDao;

@@ -26,13 +26,13 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import syndeticlogic.tiro.controller.IOControllerFactory;
+import syndeticlogic.tiro.jdbc.BaseJdbcDao;
+import syndeticlogic.tiro.model.Controller;
+import syndeticlogic.tiro.model.ControllerMeta;
+import syndeticlogic.tiro.model.Trial;
+import syndeticlogic.tiro.model.TrialMeta;
 import syndeticlogic.tiro.monitor.AbstractMonitor;
 import syndeticlogic.tiro.monitor.AbstractMonitor.Platform;
-import syndeticlogic.tiro.persistence.Controller;
-import syndeticlogic.tiro.persistence.ControllerMeta;
-import syndeticlogic.tiro.persistence.Trial;
-import syndeticlogic.tiro.persistence.TrialMeta;
-import syndeticlogic.tiro.persistence.jdbc.BaseJdbcDao;
 import syndeticlogic.tiro.trial.TrialRunner;
 import syndeticlogic.tiro.trial.TrialRunnerFactory;
 

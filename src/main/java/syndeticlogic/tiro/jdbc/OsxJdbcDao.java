@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.persistence.jdbc;
+package syndeticlogic.tiro.jdbc;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.Properties;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
-import syndeticlogic.tiro.persistence.stats.OsxAggregatedIOStats;
-import syndeticlogic.tiro.persistence.stats.OsxCpuStats;
-import syndeticlogic.tiro.persistence.stats.OsxIOStats;
-import syndeticlogic.tiro.persistence.stats.OsxMemoryStats;
+import syndeticlogic.tiro.stat.OsxAggregatedIOStats;
+import syndeticlogic.tiro.stat.OsxCpuStats;
+import syndeticlogic.tiro.stat.OsxIOStats;
+import syndeticlogic.tiro.stat.OsxMemoryStats;
 
 import java.sql.PreparedStatement;
 

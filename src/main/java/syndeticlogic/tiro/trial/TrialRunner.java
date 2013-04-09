@@ -5,10 +5,10 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.tiro.controller.IOController;
 import syndeticlogic.tiro.controller.IOExecutor;
+import syndeticlogic.tiro.model.Controller;
+import syndeticlogic.tiro.model.IORecord;
+import syndeticlogic.tiro.model.Trial;
 import syndeticlogic.tiro.monitor.SystemMonitor;
-import syndeticlogic.tiro.persistence.Controller;
-import syndeticlogic.tiro.persistence.IORecord;
-import syndeticlogic.tiro.persistence.Trial;
 
 public class TrialRunner {
     private static final Log log = LogFactory.getLog(TrialRunner.class);

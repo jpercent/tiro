@@ -1,8 +1,8 @@
-package syndeticlogic.tiro.persistence.stats;
+package syndeticlogic.tiro.stat;
 
 import java.util.LinkedList;
 
-import syndeticlogic.tiro.persistence.stats.CpuStats;
+import syndeticlogic.tiro.stat.CpuStats;
 
 import java.util.List;
 

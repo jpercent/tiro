@@ -4,10 +4,10 @@ import java.util.HashSet;
 
 import syndeticlogic.tiro.controller.IOControllerFactory;
 import syndeticlogic.tiro.controller.IOController;
+import syndeticlogic.tiro.jdbc.BaseJdbcDao;
+import syndeticlogic.tiro.model.Controller;
+import syndeticlogic.tiro.model.Trial;
 import syndeticlogic.tiro.monitor.SystemMonitor;
-import syndeticlogic.tiro.persistence.Controller;
-import syndeticlogic.tiro.persistence.Trial;
-import syndeticlogic.tiro.persistence.jdbc.BaseJdbcDao;
 
 public class TrialRunnerFactory {
     private final IOControllerFactory builder;

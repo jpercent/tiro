@@ -3,8 +3,8 @@ package syndeticlogic.tiro.controller;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import syndeticlogic.tiro.persistence.IORecord;
-import syndeticlogic.tiro.persistence.IORecord.IOStrategy;
+import syndeticlogic.tiro.model.IORecord;
+import syndeticlogic.tiro.model.IORecord.IOStrategy;
 
 public class SynchronousFileChannelIOExecutor implements IOExecutor {
     @SuppressWarnings("unused")

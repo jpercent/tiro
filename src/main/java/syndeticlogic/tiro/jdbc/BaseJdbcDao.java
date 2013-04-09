@@ -1,4 +1,4 @@
-package syndeticlogic.tiro.persistence.jdbc;
+package syndeticlogic.tiro.jdbc;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -11,19 +11,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import syndeticlogic.tiro.persistence.Controller;
-import syndeticlogic.tiro.persistence.ControllerMeta;
-import syndeticlogic.tiro.persistence.IORecord;
-import syndeticlogic.tiro.persistence.Trial;
-import syndeticlogic.tiro.persistence.TrialMeta;
-import syndeticlogic.tiro.persistence.stats.LinuxAggregatedIOStats;
-import syndeticlogic.tiro.persistence.stats.LinuxCpuStats;
-import syndeticlogic.tiro.persistence.stats.LinuxIOStats;
-import syndeticlogic.tiro.persistence.stats.LinuxMemoryStats;
-import syndeticlogic.tiro.persistence.stats.OsxAggregatedIOStats;
-import syndeticlogic.tiro.persistence.stats.OsxCpuStats;
-import syndeticlogic.tiro.persistence.stats.OsxIOStats;
-import syndeticlogic.tiro.persistence.stats.OsxMemoryStats;
+import syndeticlogic.tiro.model.Controller;
+import syndeticlogic.tiro.model.ControllerMeta;
+import syndeticlogic.tiro.model.IORecord;
+import syndeticlogic.tiro.model.Trial;
+import syndeticlogic.tiro.model.TrialMeta;
+import syndeticlogic.tiro.stat.LinuxAggregatedIOStats;
+import syndeticlogic.tiro.stat.LinuxCpuStats;
+import syndeticlogic.tiro.stat.LinuxIOStats;
+import syndeticlogic.tiro.stat.LinuxMemoryStats;
+import syndeticlogic.tiro.stat.OsxAggregatedIOStats;
+import syndeticlogic.tiro.stat.OsxCpuStats;
+import syndeticlogic.tiro.stat.OsxIOStats;
+import syndeticlogic.tiro.stat.OsxMemoryStats;
 
 import java.sql.PreparedStatement;
 

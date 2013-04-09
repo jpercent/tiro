@@ -1,6 +1,6 @@
 package syndeticlogic.tiro.controller;
 
-import syndeticlogic.tiro.persistence.Controller;
+import syndeticlogic.tiro.model.Controller;
 
 public class IOControllerFactory {
     public IOController createIOController(Controller model) {

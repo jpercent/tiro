@@ -3,9 +3,9 @@ package syndeticlogic.tiro.controller;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import syndeticlogic.tiro.persistence.IORecord;
-import syndeticlogic.tiro.persistence.ControllerMeta.MemoryType;
-import syndeticlogic.tiro.persistence.IORecord.IOStrategy;
+import syndeticlogic.tiro.model.IORecord;
+import syndeticlogic.tiro.model.ControllerMeta.MemoryType;
+import syndeticlogic.tiro.model.IORecord.IOStrategy;
 
 public class SequentialScanIOController implements IOController {
     private final ByteBuffer buffer;
