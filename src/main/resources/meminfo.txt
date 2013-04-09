@@ -1,0 +1,163 @@
+actual values on my system:
+
+MemTotal:       16335908 kB
+MemFree:        10908456 kB
+Buffers:          208096 kB
+Cached:          2979080 kB
+SwapCached:            0 kB
+Active:          3321608 kB
+Inactive:        1701152 kB
+Active(anon):    2019956 kB
+Inactive(anon):   611708 kB
+Active(file):    1301652 kB
+Inactive(file):  1089444 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:      16675836 kB
+SwapFree:       16675836 kB
+Dirty:               148 kB
+Writeback:             0 kB
+AnonPages:       1835644 kB
+Mapped:           227108 kB
+Shmem:            796084 kB
+Slab:             146752 kB
+SReclaimable:     112084 kB
+SUnreclaim:        34668 kB
+KernelStack:        4304 kB
+PageTables:        30992 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    24843788 kB
+Committed_AS:    5244752 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      586000 kB
+VmallocChunk:   34359126244 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:       63488 kB
+DirectMap2M:    16621568 kB
+
+
+
+meminfo:
+
+Provides information about distribution and utilization of memory.  This
+varies by architecture and compile options.  The following is from a
+16GB PIII, which has highmem enabled.  You may not have all of these fields.
+
+> cat /proc/meminfo
+
+The "Locked" indicates whether the mapping is locked in memory or not.
+
+
+MemTotal:     16344972 kB
+MemFree:      13634064 kB
+Buffers:          3656 kB
+Cached:        1195708 kB
+SwapCached:          0 kB
+Active:         891636 kB
+Inactive:      1077224 kB
+HighTotal:    15597528 kB
+HighFree:     13629632 kB
+LowTotal:       747444 kB
+LowFree:          4432 kB
+SwapTotal:           0 kB
+SwapFree:            0 kB
+Dirty:             968 kB
+Writeback:           0 kB
+AnonPages:      861800 kB
+Mapped:         280372 kB
+Slab:           284364 kB
+SReclaimable:   159856 kB
+SUnreclaim:     124508 kB
+PageTables:      24448 kB
+NFS_Unstable:        0 kB
+Bounce:              0 kB
+WritebackTmp:        0 kB
+CommitLimit:   7669796 kB
+Committed_AS:   100056 kB
+VmallocTotal:   112216 kB
+VmallocUsed:       428 kB
+VmallocChunk:   111088 kB
+AnonHugePages:   49152 kB
+
+    MemTotal: Total usable ram (i.e. physical ram minus a few reserved
+              bits and the kernel binary code)
+     MemFree: The sum of LowFree+HighFree
+     Buffers: Relatively temporary storage for raw disk blocks
+              shouldn't get tremendously large (20MB or so)
+      Cached: in-memory cache for files read from the disk (the
+              pagecache).  Doesn't include SwapCached
+  SwapCached: Memory that once was swapped out, is swapped back in but
+              still also is in the swapfile (if memory is needed it
+              doesn't need to be swapped out AGAIN because it is already
+              in the swapfile. This saves I/O)
+      Active: Memory that has been used more recently and usually not
+              reclaimed unless absolutely necessary.
+    Inactive: Memory which has been less recently used.  It is more
+              eligible to be reclaimed for other purposes
+   HighTotal:
+    HighFree: Highmem is all memory above ~860MB of physical memory
+              Highmem areas are for use by userspace programs, or
+              for the pagecache.  The kernel must use tricks to access
+              this memory, making it slower to access than lowmem.
+    LowTotal:
+     LowFree: Lowmem is memory which can be used for everything that
+              highmem can be used for, but it is also available for the
+              kernel's use for its own data structures.  Among many
+              other things, it is where everything from the Slab is
+              allocated.  Bad things happen when you're out of lowmem.
+   SwapTotal: total amount of swap space available
+    SwapFree: Memory which has been evicted from RAM, and is temporarily
+              on the disk
+       Dirty: Memory which is waiting to get written back to the disk
+   Writeback: Memory which is actively being written back to the disk
+   AnonPages: Non-file backed pages mapped into userspace page tables
+AnonHugePages: Non-file backed huge pages mapped into userspace page tables
+      Mapped: files which have been mmaped, such as libraries
+        Slab: in-kernel data structures cache
+SReclaimable: Part of Slab, that might be reclaimed, such as caches
+  SUnreclaim: Part of Slab, that cannot be reclaimed on memory pressure
+  PageTables: amount of memory dedicated to the lowest level of page
+              tables.
+NFS_Unstable: NFS pages sent to the server, but not yet committed to stable
+	      storage
+      Bounce: Memory used for block device "bounce buffers"
+WritebackTmp: Memory used by FUSE for temporary writeback buffers
+ CommitLimit: Based on the overcommit ratio ('vm.overcommit_ratio'),
+              this is the total amount of  memory currently available to
+              be allocated on the system. This limit is only adhered to
+              if strict overcommit accounting is enabled (mode 2 in
+              'vm.overcommit_memory').
+              The CommitLimit is calculated with the following formula:
+              CommitLimit = ('vm.overcommit_ratio' * Physical RAM) + Swap
+              For example, on a system with 1G of physical RAM and 7G
+              of swap with a `vm.overcommit_ratio` of 30 it would
+              yield a CommitLimit of 7.3G.
+              For more details, see the memory overcommit documentation
+              in vm/overcommit-accounting.
+Committed_AS: The amount of memory presently allocated on the system.
+              The committed memory is a sum of all of the memory which
+              has been allocated by processes, even if it has not been
+              "used" by them as of yet. A process which malloc()'s 1G
+              of memory, but only touches 300M of it will only show up
+              as using 300M of memory even if it has the address space
+              allocated for the entire 1G. This 1G is memory which has
+              been "committed" to by the VM and can be used at any time
+              by the allocating application. With strict overcommit
+              enabled on the system (mode 2 in 'vm.overcommit_memory'),
+              allocations which would exceed the CommitLimit (detailed
+              above) will not be permitted. This is useful if one needs
+              to guarantee that processes will not fail due to lack of
+              memory once that memory has been successfully allocated.
+VmallocTotal: total size of vmalloc memory area
+ VmallocUsed: amount of vmalloc area which is used
+VmallocChunk: largest contiguous block of vmalloc area which is free
+
+..............................................................................
