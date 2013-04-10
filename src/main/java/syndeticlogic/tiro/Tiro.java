@@ -172,7 +172,7 @@ public class Tiro {
         for (Map<String, Object> trialMetaJson : trialMetaJsons) {
             @SuppressWarnings("unchecked")
             List<Map<String, String>> controllerMetaJsons = (List<Map<String, String>>) trialMetaJson.get("controllers");
-            TrialMeta trialMeta = new TrialMeta((String) trialMetaJson.get("name"));
+            TrialMeta trialMeta = new TrialMeta(getPlatform().name(), (String) trialMetaJson.get("name"));
             baseJdbcDao.insertTrialMeta(trialMeta);
             Trial trial = new Trial(trialMeta);
             //baseJdbcDao.insertTrial(trial);

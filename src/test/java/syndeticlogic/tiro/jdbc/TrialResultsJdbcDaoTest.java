@@ -36,7 +36,7 @@ public class TrialResultsJdbcDaoTest {
     
     @Test
     public void testInsertTrialMeta() {
-        TrialMeta meta = new TrialMeta("test-trial-meta");
+        TrialMeta meta = new TrialMeta(Tiro.getPlatform().name(), "test-trial-meta");
         assertEquals(-1, meta.getId());
         baseJdbcDao.insertTrialMeta(meta);
         assertEquals(1, meta.getId());

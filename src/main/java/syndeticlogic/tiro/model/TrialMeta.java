@@ -28,6 +28,10 @@ public class TrialMeta {
         this.id = l;
     }
 
+	public String getOS() {
+		return os;
+	}
+	
     public String getName() {
         return name;
     }
@@ -66,11 +70,10 @@ public class TrialMeta {
 		return true;
 	}
 
-
 	public static class TrialMetaRowMapper implements RowMapper<TrialMeta> {
         @Override
         public TrialMeta mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new TrialMeta(rs.getLong("id"), rs.getString("os"), rs.getString("name"));
         }
-    }   
+    }
 }

@@ -253,7 +253,7 @@ public class BaseJdbcDao {
 	}
     public void insertTrialMeta(TrialMeta trialMeta) {
         System.out.println(insertTrialMeta);
-        jdbcTemplate.update(insertTrialMeta, trialMeta.getName());
+        jdbcTemplate.update(insertTrialMeta,  trialMeta.getOS(), trialMeta.getName());
         trialMeta.setId(jdbcTemplate.queryForLong(selectTrialsMetaLast));
     }
 
