@@ -13,8 +13,6 @@ import org.apache.commons.logging.LogFactory;
 
 public abstract class AbstractMonitor implements Monitor {
 	private static final Log log = LogFactory.getLog(AbstractMonitor.class);
-    public enum Platform { Linux, OSX, Windows };
-	private static Platform platform;
 	private List<String> commandAndArgs;
 	private Process process;
 	private long start;
@@ -87,12 +85,4 @@ public abstract class AbstractMonitor implements Monitor {
     }
     
     abstract protected void processMonitorOutput(BufferedReader reader) throws IOException;
-    
-    public static Platform getPlatform() {
-        return platform;
-    }
-    
-    public static void setPlatform(Platform platform) {
-        AbstractMonitor.platform = platform;
-    }
 }

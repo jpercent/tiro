@@ -11,11 +11,11 @@ import syndeticlogic.tiro.monitor.SystemMonitor;
 
 public class TrialRunnerFactory {
     private final IOControllerFactory builder;
-    private final BaseJdbcDao baseJdbcDao;
+    private final BaseJdbcDao jdbcDao;
     
-    public TrialRunnerFactory(IOControllerFactory builder, BaseJdbcDao baseJdbcDao) {
+    public TrialRunnerFactory(IOControllerFactory builder, BaseJdbcDao jdbcDao) {
         this.builder = builder;
-        this.baseJdbcDao = baseJdbcDao;
+        this.jdbcDao = jdbcDao;
     }
     
     public TrialRunner createTrialRunner(Trial trial, Controller[] controllerModels) {
@@ -26,7 +26,7 @@ public class TrialRunnerFactory {
             controllers[i++] = builder.createIOController(cmodel);
             
         SystemMonitor monitor = SystemMonitor.createSystemMonitor(devices.toArray(new String[devices.size()]));
-        TrialResultCollector results = new TrialResultCollector(baseJdbcDao);
+        TrialResultCollector results = TrialResultCollector.createResultCollector(jdbcDao);
         return new TrialRunner(trial, controllerModels, monitor, controllers, results);
     }
 }

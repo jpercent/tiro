@@ -3,6 +3,7 @@ package syndeticlogic.tiro.monitor;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import syndeticlogic.tiro.Tiro;
 import syndeticlogic.tiro.stat.CpuStats;
 import syndeticlogic.tiro.stat.IOStats;
 import syndeticlogic.tiro.stat.MemoryStats;
@@ -15,11 +16,12 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
 	
 	public static SystemMonitor createSystemMonitor(String[] devices) {
 	    final SystemMonitor monitor;
-	    switch(AbstractMonitor.getPlatform()) {
+	    switch(Tiro.getPlatform()) {
 	    case OSX:
 	        monitor = new SystemMonitor(new OsxMemoryMonitor(), new OsxIOMonitor(devices));
 	        break;
 	    case Linux:
+	    	monitor = new SystemMonitor(new LinuxMemoryMonitor(), new LinuxIOMonitor(devices));
 	    case Windows:
 	    default:
 	        throw new RuntimeException("unsupported platform");

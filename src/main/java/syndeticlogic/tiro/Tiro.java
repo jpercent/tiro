@@ -31,12 +31,12 @@ import syndeticlogic.tiro.model.Controller;
 import syndeticlogic.tiro.model.ControllerMeta;
 import syndeticlogic.tiro.model.Trial;
 import syndeticlogic.tiro.model.TrialMeta;
-import syndeticlogic.tiro.monitor.AbstractMonitor;
-import syndeticlogic.tiro.monitor.AbstractMonitor.Platform;
 import syndeticlogic.tiro.trial.TrialRunner;
 import syndeticlogic.tiro.trial.TrialRunnerFactory;
 
 public class Tiro {
+	public enum Platform { Linux, OSX, Windows }
+	private static Platform platform;
     private final Options options = new Options();
     private final CommandLineParser parser;
     private final String usage;
@@ -62,8 +62,8 @@ public class Tiro {
                 "concurrent",
                 "Turns on concurent trial execution.  Generally, trials will be run sequentially, but when this flag is supplied all trials will run concurrently");
 
-        Option init = new Option("init",
-                "Creates the enviroment necessary to use the tool.  Needs to be run once.  Any previous data will be destroyed.");
+        Option init = new Option("reinit",
+                "Recreates the enviroment necessary to use the tool (the enviroment is automatically created).  Any previous data will be destroyed.");
 
         @SuppressWarnings("static-access")
         Option properties = OptionBuilder
@@ -159,7 +159,8 @@ public class Tiro {
     }
 
     public List<TrialRunner> buildTrials() {
-        if (init) {
+    	
+        if (baseJdbcDao.needsInit() || init) {
             baseJdbcDao.createTables();
         }
         
@@ -193,11 +194,11 @@ public class Tiro {
 
     public void configurePlatform() {
         if (SystemUtils.IS_OS_MAC_OSX)
-            AbstractMonitor.setPlatform(Platform.OSX);
+            Tiro.setPlatform(Platform.OSX);
         else if (SystemUtils.IS_OS_LINUX)
-            AbstractMonitor.setPlatform(Platform.Linux);
+            Tiro.setPlatform(Platform.Linux);
         else if (SystemUtils.IS_OS_WINDOWS)
-            AbstractMonitor.setPlatform(Platform.Windows);
+            Tiro.setPlatform(Platform.Windows);
         else
             throw new RuntimeException("unsupported platform");
     }
@@ -229,6 +230,14 @@ public class Tiro {
                 }
             }
         } while (++count < retries);
+    }
+    
+    public static Platform getPlatform() {
+    	return platform;
+    }
+    
+    public static void setPlatform(Platform platform) {
+    	Tiro.platform = platform;
     }
     
     public static TrialRunner createSequentialScanTrial() throws Exception {

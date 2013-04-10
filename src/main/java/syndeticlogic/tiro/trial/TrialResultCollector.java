@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import syndeticlogic.tiro.Tiro;
 import syndeticlogic.tiro.jdbc.BaseJdbcDao;
+import syndeticlogic.tiro.jdbc.LinuxJdbcDao;
+import syndeticlogic.tiro.jdbc.OsxJdbcDao;
 import syndeticlogic.tiro.model.Controller;
 import syndeticlogic.tiro.model.IORecord;
 import syndeticlogic.tiro.model.Trial;
@@ -24,8 +27,8 @@ public abstract class TrialResultCollector {
     private final int threshold;
     protected volatile boolean done;
 
-    public TrialResultCollector(BaseJdbcDao jdbcDaoa) {    
-        this.baseJdbcDao = jdbcDaoa;
+    public TrialResultCollector(BaseJdbcDao jdbcDao) {    
+        this.baseJdbcDao = jdbcDao;
         trials = new HashMap<Long, ControllerResultDescriptor>();
         lock = new ReentrantLock();
         condition = lock.newCondition();
@@ -133,4 +136,21 @@ public abstract class TrialResultCollector {
     }
 	
 	abstract void completeTrial(Long trialId, SystemMonitor monitor, long duration);
+	
+	public static TrialResultCollector createResultCollector(BaseJdbcDao jdbcDao) {
+	    final TrialResultCollector collector;
+	    switch(Tiro.getPlatform()) {
+	    case OSX:
+	    	assert jdbcDao instanceof LinuxJdbcDao;
+	        collector = new LinuxTrialResultCollector((LinuxJdbcDao)jdbcDao); 
+	        break;
+	    case Linux:
+	    	assert jdbcDao instanceof OsxJdbcDao;
+	        collector = new OsxTrialResultCollector((OsxJdbcDao)jdbcDao);
+	    case Windows:
+	    default:
+	        throw new RuntimeException("unsupported platform");
+	    }
+	    return collector;
+	}
 }
