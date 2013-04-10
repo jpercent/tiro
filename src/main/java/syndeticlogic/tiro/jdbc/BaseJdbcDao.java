@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import syndeticlogic.tiro.Tiro;
 import syndeticlogic.tiro.model.Controller;
 import syndeticlogic.tiro.model.ControllerMeta;
 import syndeticlogic.tiro.model.IORecord;
@@ -227,8 +228,9 @@ public class BaseJdbcDao {
     
 	public boolean needsInit() {
 		boolean ret = false;
+		Connection connection=null;
 		try {
-			Connection connection = source.getConnection();
+			connection = source.getConnection();
 			DatabaseMetaData dbm = connection.getMetaData();
 			
 			@SuppressWarnings("serial")
@@ -248,6 +250,13 @@ public class BaseJdbcDao {
 		} catch (SQLException e) {
 			log.fatal("Recieved SQLException configuring Tiro", e);
 			throw new RuntimeException(e);
+		} finally {
+			try {
+				if(connection != null)
+					connection.close();
+				} catch (SQLException e) {
+					log.warn(" could not close connection", e);
+				}
 		}
 		return ret;
 	}
@@ -332,4 +341,20 @@ public class BaseJdbcDao {
     public List<?> adHocQuery(String sql, RowMapper<?> rowMapper) {
         return jdbcTemplate.query(sql, rowMapper);
     }
+
+	public static BaseJdbcDao createJdbcDao(Properties properties) {
+	    final BaseJdbcDao jdbcDao;
+	    switch(Tiro.getPlatform()) {
+	    case OSX:
+	        jdbcDao = new OsxJdbcDao(properties);
+	        break;
+	    case Linux:
+	    	jdbcDao = new LinuxJdbcDao(properties);
+	    	break;
+	    case Windows:
+	    default:
+	        throw new RuntimeException("unsupported platform");
+	    }
+		return jdbcDao;
+	}
 }
