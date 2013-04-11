@@ -47,9 +47,18 @@ public class Tiro {
     private final BaseJdbcDao baseJdbcDao;
     private int retries;
     private boolean concurrent;
-    private boolean init;
+    private boolean reinit;
 
     public Tiro(String[] args) throws Exception {
+        if (SystemUtils.IS_OS_MAC_OSX)
+            Tiro.setPlatform(Platform.OSX);
+        else if (SystemUtils.IS_OS_LINUX)
+            Tiro.setPlatform(Platform.Linux);
+        else if (SystemUtils.IS_OS_WINDOWS)
+            Tiro.setPlatform(Platform.Windows);
+        else
+            throw new RuntimeException("unsupported platform");
+
         this.args = args;
         usage = "catena-analyzer.sh -config <config-file-path> [options]...";
         header = "Runs various performance trials based on settings in the properties file."
@@ -85,8 +94,7 @@ public class Tiro {
         options.addOption(properties);
         options.addOption(retries);
         parser = new GnuParser();
-        baseJdbcDao = new BaseJdbcDao(Tiro.loadProperties());
-
+        baseJdbcDao = BaseJdbcDao.createJdbcDao(Tiro.loadProperties());
     }
 
     @SuppressWarnings("unchecked")
@@ -110,8 +118,8 @@ public class Tiro {
 				return false;
 			}
 
-			if (line.hasOption("init")) {
-				this.init = true;
+			if (line.hasOption("reinit")) {
+				this.reinit = true;
 			}
 
 			if (line.hasOption("concurrent")) {
@@ -160,10 +168,6 @@ public class Tiro {
 
     public List<TrialRunner> buildTrials() {
     	
-        if (baseJdbcDao.needsInit() || init) {
-            baseJdbcDao.createTables();
-        }
-        
         LinkedList<TrialRunner> trialRunners = new LinkedList<TrialRunner>();
         baseJdbcDao.initialize();
         System.out.println(config);
@@ -191,17 +195,6 @@ public class Tiro {
         }
         return trialRunners;
     }
-
-    public void configurePlatform() {
-        if (SystemUtils.IS_OS_MAC_OSX)
-            Tiro.setPlatform(Platform.OSX);
-        else if (SystemUtils.IS_OS_LINUX)
-            Tiro.setPlatform(Platform.Linux);
-        else if (SystemUtils.IS_OS_WINDOWS)
-            Tiro.setPlatform(Platform.Windows);
-        else
-            throw new RuntimeException("unsupported platform");
-    }
     
     public void cleanUpSystem() {
     }
@@ -211,8 +204,9 @@ public class Tiro {
             log.fatal("Failed to parse the command line - exiting.");
             return;
         }
-        configurePlatform();
-
+        if(reinit)
+        	;
+       
         int count = 0;
         do {
             List<TrialRunner> runners = buildTrials();
