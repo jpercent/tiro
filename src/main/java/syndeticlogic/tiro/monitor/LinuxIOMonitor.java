@@ -15,7 +15,7 @@ import syndeticlogic.tiro.stat.LinuxCpuStats;
 import syndeticlogic.tiro.stat.LinuxIOStats;
 
 public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
-    private static final Log log = LogFactory.getLog(OsxIOMonitor.class);
+    private static final Log log = LogFactory.getLog(LinuxIOMonitor.class);
     private String[] devices;
     private LinuxIOStats[] iostats;
     private LinuxCpuStats cpustats;
@@ -43,7 +43,7 @@ public class LinuxIOMonitor extends AbstractMonitor implements IOMonitor {
 		reader.readLine();
 		while(true) {
 			String line = reader.readLine();
-			if(line == null) {
+			if(line == null || line.equals("")) {
 				break;
 			}
 			reader.readLine();
