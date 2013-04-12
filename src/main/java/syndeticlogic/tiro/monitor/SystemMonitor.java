@@ -22,6 +22,7 @@ public class SystemMonitor extends AbstractMonitor implements MemoryMonitor, IOM
 	        break;
 	    case Linux:
 	    	monitor = new SystemMonitor(new LinuxMemoryMonitor(), new LinuxIOMonitor(devices));
+	    	break;
 	    case Windows:
 	    default:
 	        throw new RuntimeException("unsupported platform");
