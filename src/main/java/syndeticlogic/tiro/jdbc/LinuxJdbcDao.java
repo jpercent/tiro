@@ -49,7 +49,7 @@ public class LinuxJdbcDao extends BaseJdbcDao {
             id = memoryStatsId;
             memoryStatsId += free.size();
         }
-        jdbcTemplate.batchUpdate(insertMemoryStats, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate(sql.getInsertMemoryStats(), new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
             	int j = 1;
@@ -97,7 +97,7 @@ public class LinuxJdbcDao extends BaseJdbcDao {
             id = ioStatsId;
             ioStatsId += tps.size();
         }
-        jdbcTemplate.batchUpdate(insertIOStats, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate(sql.getInsertIOStats(), new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, id+i);
@@ -123,33 +123,42 @@ public class LinuxJdbcDao extends BaseJdbcDao {
 			id = cpuStatsId;
 			cpuStatsId += idleMode.size();
 		}
-		jdbcTemplate.batchUpdate(insertCpuStats,
-				new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int i)
-							throws SQLException {
-						ps.setLong(1, id + i);
-						ps.setLong(2, trialId);
-						ps.setDouble(3, userMode.get(i));
-						ps.setDouble(4, systemMode.get(i));
-						ps.setDouble(4, iowait.get(i));
-						ps.setDouble(5, idleMode.get(i));
-					}
-
-					@Override
-					public int getBatchSize() {
-						return idleMode.size();
-					}
-				});
+		jdbcTemplate.batchUpdate(sql.getInsertCpuStats(), new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setLong(1, id + i);
+				ps.setLong(2, trialId);
+				ps.setDouble(3, userMode.get(i));
+				ps.setDouble(4, systemMode.get(i));
+				ps.setDouble(5, iowait.get(i));
+				ps.setDouble(6, idleMode.get(i));
+			}
+			
+			@Override
+			public int getBatchSize() {
+				return idleMode.size();
+			}
+		});
 	}
 
-	public void completeTrial(LinuxAggregatedIOStats aggregatedIOStats, LinuxMemoryStats memoryStats, LinuxCpuStats cpuStats, long duration, Long trialId) {
-        jdbcTemplate.update(completeTrial, duration, aggregatedIOStats.getAverageKpsRead(), cpuStats.getAverageUserModeTime(), 
-                cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIowaitTime(), cpuStats.getAverageIdleModeTime(),                 
-                memoryStats.getFree(), memoryStats.getBuffers(), memoryStats.getCached(), memoryStats.getSwapCached(), memoryStats.getActive(), memoryStats.getActiveAnon(),
-            	memoryStats.getActiveFile(), memoryStats.getInactive(), memoryStats.getInactiveAnon(), memoryStats.getInactiveFile(), memoryStats.getUnevictable(),
-            	memoryStats.getSwapTotal(), memoryStats.getSwapFree(), memoryStats.getDirty(), memoryStats.getWriteback(), memoryStats.getAnon(), memoryStats.getSlab(),
-            	memoryStats.getSreclaim(), memoryStats.getSunreclaim(), memoryStats.getKernelStack(), memoryStats.getBounce(), memoryStats.getVmallocTotal(), 
-            	memoryStats.getVmallocUsed(), memoryStats.getVmallocChunk(), trialId);
+	public void completeTrial(LinuxAggregatedIOStats aggregatedIOStats, LinuxMemoryStats memoryStats, 
+			LinuxCpuStats cpuStats, long duration, Long trialId) 
+	{
+        jdbcTemplate.update(sql.getCompleteTrial(), duration, trialId);
+        long id;
+        synchronized(this) {
+            id = aggregateStatsId++;
+        }
+        jdbcTemplate.update(sql.getInsertAggregateStats(), id, trialId, 
+        		aggregatedIOStats.getAverageTps(), aggregatedIOStats.getAverageKpsRead(), aggregatedIOStats.getAverageKpsWritten(),
+        		cpuStats.getAverageUserModeTime(),cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIowaitTime(), cpuStats.getAverageIdleModeTime(),                 
+                memoryStats.getFree(), memoryStats.getBuffers(), memoryStats.getCached(), 
+                memoryStats.getSwapCached(), memoryStats.getActive(), memoryStats.getActiveAnon(), 
+                memoryStats.getActiveFile(), memoryStats.getInactive(), memoryStats.getInactiveAnon(), 
+                memoryStats.getInactiveFile(), memoryStats.getUnevictable(),	memoryStats.getSwapTotal(), 
+                memoryStats.getSwapFree(), memoryStats.getDirty(), memoryStats.getWriteback(),
+                memoryStats.getAnon(), memoryStats.getSlab(), memoryStats.getSreclaim(), 
+                memoryStats.getSunreclaim(), memoryStats.getKernelStack(), memoryStats.getBounce(), 
+                memoryStats.getVmallocTotal(), memoryStats.getVmallocUsed(), memoryStats.getVmallocChunk());
 	}
 }

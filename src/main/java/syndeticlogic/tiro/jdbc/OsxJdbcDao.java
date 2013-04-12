@@ -35,7 +35,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
             id = memoryStatsId;
             memoryStatsId += freePages.size();
         }
-        jdbcTemplate.batchUpdate(insertMemoryStats, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate(sql.getInsertMemoryStats(), new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, id+i);
@@ -68,7 +68,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
             id = ioStatsId;
             ioStatsId += megabytesPerSecond.size();
         }
-        jdbcTemplate.batchUpdate(insertIOStats, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate(sql.getInsertIOStats(), new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, id+i);
@@ -93,7 +93,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
             id = cpuStatsId;
             cpuStatsId += idleMode.size();
         }
-        jdbcTemplate.batchUpdate(insertCpuStats, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate(sql.getInsertCpuStats(), new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, id+i);
@@ -110,7 +110,7 @@ public class OsxJdbcDao extends BaseJdbcDao {
     }
     
     public void completeTrial(OsxAggregatedIOStats ioStats, OsxMemoryStats memoryStats, OsxCpuStats cpuStats, long duration, long trialId) {
-        jdbcTemplate.update(completeTrial, duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
+        jdbcTemplate.update(sql.getCompleteTrial(), duration, ioStats.getAverageMegabytesPerSecond(), cpuStats.getAverageUserModeTime(), 
                 cpuStats.getAverageSystemModeTime(), cpuStats.getAverageIdleModeTime(), memoryStats.getAverageFreePages(), 
                 memoryStats.getAverageActivePages(), memoryStats.getAverageInactivePages(), memoryStats.getAverageWiredPages(), 
                 memoryStats.getAverageNumberOfFaultRoutineCalls(), memoryStats.getAverageCopyOnWriteFaults(), memoryStats.getAverageZeroFilledPages(),
